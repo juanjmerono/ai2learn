@@ -92,7 +92,7 @@ header {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 24px;
-  max-width: 900px;
+  max-width: 1240px;
   margin: 0 auto;
   padding: 0 24px 80px;
 }
@@ -115,8 +115,10 @@ header {
 .card-stripe {
   height: 6px;
 }
-.card-stripe.docente  { background: var(--primary); }
+.card-stripe.docente    { background: var(--primary); }
 .card-stripe.estudiante { background: var(--teal); }
+.card-stripe.home-d     { background: #1d4ed8; }
+.card-stripe.home-e     { background: var(--accent); }
 
 .card-body { padding: 24px 24px 20px; flex: 1; }
 
@@ -126,6 +128,8 @@ header {
 }
 .card-role.docente    { color: var(--primary); }
 .card-role.estudiante { color: var(--teal); }
+.card-role.home-d     { color: #1d4ed8; }
+.card-role.home-e     { color: var(--accent); }
 
 .card-icon { font-size: 40px; margin-bottom: 12px; display: block; }
 
@@ -150,6 +154,8 @@ header {
 }
 .docente  .flow-num { background: #eff6ff; color: var(--primary); }
 .estudiante .flow-num { background: var(--teal-bg, #f0fdfa); color: var(--teal); }
+.home-d   .flow-num { background: #eff6ff; color: #1d4ed8; }
+.home-e   .flow-num { background: #faf5ff; color: var(--accent); }
 
 .aha-box {
   margin-top: 16px;
@@ -159,12 +165,16 @@ header {
 }
 .docente    .aha-box { background: #eff6ff; border: 1px solid #bfdbfe; }
 .estudiante .aha-box { background: #f0fdfa; border: 1px solid #99f6e4; }
+.home-d     .aha-box { background: #eff6ff; border: 1px solid #bfdbfe; }
+.home-e     .aha-box { background: #faf5ff; border: 1px solid #ddd6fe; }
 .aha-label {
   font-size: 11px; font-weight: 700; text-transform: uppercase;
   letter-spacing: .5px; margin-bottom: 4px;
 }
 .docente    .aha-label { color: var(--primary); }
 .estudiante .aha-label { color: var(--teal); }
+.home-d     .aha-label { color: #1d4ed8; }
+.home-e     .aha-label { color: var(--accent); }
 
 .card-footer {
   padding: 16px 24px 24px;
@@ -181,6 +191,8 @@ header {
 .btn:hover { opacity: .9; transform: scale(1.01); }
 .btn-docente    { background: var(--primary); color: #fff; }
 .btn-estudiante { background: var(--teal); color: #fff; }
+.btn-home-d     { background: #1d4ed8; color: #fff; }
+.btn-home-e     { background: var(--accent); color: #fff; }
 
 /* Divider */
 .how {
@@ -228,10 +240,12 @@ footer {
 </div>
 
 <div class="question-banner">
-  <div class="q-label">Pregunta que responden estos prototipos</div>
+  <div class="q-label">Preguntas que responden estos prototipos</div>
   <p>
-    <strong>Docente:</strong> ¿siento que gano control sobre mi asignatura y libero tiempo gracias al agente?<br>
-    <strong>Estudiante:</strong> ¿veo que el sistema me aporta valor real frente a un LMS tradicional?
+    <strong>Docente (asignatura):</strong> ¿siento que gano control sobre mi asignatura y libero tiempo gracias al agente?<br>
+    <strong>Estudiante (asignatura):</strong> ¿veo que el sistema me aporta valor real frente a un LMS tradicional?<br>
+    <strong>Inicio docente:</strong> ¿puedo gestionar varias asignaturas sin perder el hilo de ninguna?<br>
+    <strong>Inicio estudiante:</strong> ¿sé qué tengo que hacer hoy sin tener que entrar en cada asignatura?
   </p>
 </div>
 
@@ -313,6 +327,82 @@ footer {
     </div>
     <div class="card-footer">
       <a class="btn btn-estudiante" href="estudiante/index.html">Abrir prototipo del estudiante →</a>
+    </div>
+  </div>
+
+  <!-- ── HOME DOCENTE ── -->
+  <div class="proto-card home-d">
+    <div class="card-stripe home-d"></div>
+    <div class="card-body">
+      <div class="card-role home-d">Prototipo 3 — Punto de entrada · Docente</div>
+      <span class="card-icon">🏫</span>
+      <h2>Dashboard multi-asignatura del docente</h2>
+      <div class="question">
+        "Imparto 4 asignaturas. Necesito saber de un vistazo qué requiere mi atención ahora, sin entrar en cada una."
+      </div>
+      <ul class="flow-list">
+        <li class="flow-item">
+          <div class="flow-num">1</div>
+          <span>Vista unificada de todas las asignaturas con estado y alertas activas</span>
+        </li>
+        <li class="flow-item">
+          <div class="flow-num">2</div>
+          <span>El agente resume las alertas del día cruzando todas las asignaturas</span>
+        </li>
+        <li class="flow-item">
+          <div class="flow-num">3</div>
+          <span>Expansión en tarjeta por asignatura con alertas accionables</span>
+        </li>
+        <li class="flow-item">
+          <div class="flow-num">4</div>
+          <span>Entrada directa al dashboard detallado de cada asignatura</span>
+        </li>
+      </ul>
+      <div class="aha-box">
+        <div class="aha-label">Conecta con</div>
+        Desde aquí se puede entrar al prototipo del docente (asignatura individual) directamente.
+      </div>
+    </div>
+    <div class="card-footer">
+      <a class="btn btn-home-d" href="home-docente/index.html">Abrir inicio del docente →</a>
+    </div>
+  </div>
+
+  <!-- ── HOME ESTUDIANTE ── -->
+  <div class="proto-card home-e">
+    <div class="card-stripe home-e"></div>
+    <div class="card-body">
+      <div class="card-role home-e">Prototipo 4 — Punto de entrada · Estudiante</div>
+      <span class="card-icon">🎒</span>
+      <h2>Dashboard multi-asignatura del estudiante</h2>
+      <div class="question">
+        "Tengo 4 asignaturas a la vez. Quiero saber qué tengo pendiente hoy sin entrar en cada una por separado."
+      </div>
+      <ul class="flow-list">
+        <li class="flow-item">
+          <div class="flow-num">1</div>
+          <span>El agente resume prioridades del día cruzando todas las asignaturas</span>
+        </li>
+        <li class="flow-item">
+          <div class="flow-num">2</div>
+          <span>Tarjetas de asignatura con progreso, próxima actividad y callejones disponibles</span>
+        </li>
+        <li class="flow-item">
+          <div class="flow-num">3</div>
+          <span>Lista de actividades pendientes ordenadas por urgencia</span>
+        </li>
+        <li class="flow-item">
+          <div class="flow-num">4</div>
+          <span>Entrada directa a la asignatura activa (conecta con el prototipo del estudiante)</span>
+        </li>
+      </ul>
+      <div class="aha-box" style="background:#faf5ff;border-color:#ddd6fe">
+        <div class="aha-label" style="color:var(--accent)">Conecta con</div>
+        Desde "Fundamentos de Programación" se entra directamente al prototipo del estudiante (asignatura individual).
+      </div>
+    </div>
+    <div class="card-footer">
+      <a class="btn btn-home-e" href="home-estudiante/index.html">Abrir inicio del estudiante →</a>
     </div>
   </div>
 

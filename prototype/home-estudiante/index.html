@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<!-- PROTOTIPO DESECHABLE — no promover a producción -->
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI2Learn — Inicio Estudiante</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:        #f5f4f1;
+  --surface:   #ffffff;
+  --border:    #e2e0db;
+  --primary:   #2563eb;
+  --primary-h: #1d4ed8;
+  --accent:    #7c3aed;
+  --accent-bg: #faf5ff;
+  --teal:      #0d9488;
+  --teal-bg:   #f0fdfa;
+  --warn:      #d97706;
+  --warn-bg:   #fffbeb;
+  --ok:        #16a34a;
+  --ok-bg:     #f0fdf4;
+  --err:       #dc2626;
+  --muted:     #6b7280;
+  --text:      #111827;
+  --radius:    10px;
+  --shadow:    0 1px 4px rgba(0,0,0,.08);
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* Header */
+header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: sticky; top: 0; z-index: 50;
+}
+.logo { font-weight: 700; font-size: 18px; color: var(--primary); letter-spacing: -.5px; flex-shrink: 0; }
+.header-badge {
+  background: #fee2e2; color: #991b1b;
+  font-size: 11px; font-weight: 600;
+  padding: 2px 8px; border-radius: 20px;
+}
+.header-user {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 14px; color: var(--muted); margin-left: auto;
+}
+.avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--teal); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 13px;
+}
+
+/* Nav tabs */
+.nav-tabs {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  display: flex; gap: 0;
+}
+.nav-tab {
+  padding: 12px 18px;
+  font-size: 14px; font-weight: 500;
+  color: var(--muted); cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color .15s, border-color .15s;
+  text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+}
+.nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+.nav-tab:hover:not(.active) { color: var(--text); }
+
+main { max-width: 960px; margin: 0 auto; padding: 28px 24px 80px; }
+
+/* Section header */
+.section-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.section-head h2 { font-size: 17px; font-weight: 700; }
+.section-head a { font-size: 13px; color: var(--primary); text-decoration: none; }
+
+/* Agent strip */
+.agent-strip {
+  background: linear-gradient(135deg, #eff6ff 0%, #faf5ff 100%);
+  border: 1.5px solid #ddd6fe;
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  display: flex; align-items: flex-start; gap: 12px;
+  margin-bottom: 24px;
+}
+.agent-strip .as-icon { font-size: 26px; flex-shrink: 0; margin-top: 2px; }
+.agent-strip .as-body { flex: 1; }
+.agent-strip .as-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--accent); margin-bottom: 4px; }
+.agent-strip p { font-size: 14px; line-height: 1.6; color: var(--text); }
+.agent-strip .as-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+
+/* Subject cards grid */
+.subjects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.subject-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  transition: box-shadow .2s, transform .2s;
+  cursor: pointer;
+  text-decoration: none; color: inherit;
+}
+.subject-card:hover {
+  box-shadow: 0 4px 20px rgba(0,0,0,.12);
+  transform: translateY(-2px);
+}
+.subject-card.active-subject {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px #bfdbfe, 0 2px 8px rgba(0,0,0,.09);
+}
+
+.sc-stripe { height: 4px; }
+.sc-body { padding: 16px 18px; flex: 1; }
+.sc-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.sc-dept {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .5px; color: var(--muted);
+}
+.sc-badge {
+  font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px;
+  margin-left: auto;
+}
+.badge-active   { background: #eff6ff; color: var(--primary); }
+.badge-warn     { background: var(--warn-bg); color: var(--warn); }
+.badge-ok       { background: var(--ok-bg); color: var(--ok); }
+.badge-muted    { background: #f3f4f6; color: var(--muted); }
+
+.sc-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; line-height: 1.3; }
+.sc-teacher { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+
+/* Progress */
+.sc-progress { margin-bottom: 10px; }
+.sc-progress-top { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.sc-bar-wrap { background: var(--border); border-radius: 4px; height: 5px; }
+.sc-bar-fill { height: 5px; border-radius: 4px; transition: width .4s; }
+
+.sc-next { font-size: 13px; color: var(--text); line-height: 1.4; }
+.sc-next .next-label { font-size: 11px; color: var(--muted); margin-bottom: 2px; }
+
+/* Detour pill */
+.sc-detour {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--accent-bg); color: var(--accent);
+  border: 1px solid #ddd6fe; border-radius: 20px;
+  font-size: 11px; font-weight: 600; padding: 2px 8px;
+  margin-top: 6px;
+}
+.sc-detour.teal { background: var(--teal-bg); color: var(--teal); border-color: #99f6e4; }
+
+.sc-footer {
+  padding: 10px 18px 14px;
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.sc-last { font-size: 12px; color: var(--muted); }
+.sc-cta {
+  font-size: 13px; font-weight: 600; color: var(--primary);
+  display: flex; align-items: center; gap: 4px;
+}
+
+/* Weekly summary */
+.weekly-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+  margin-bottom: 32px;
+}
+.weekly-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px; text-align: center;
+}
+.weekly-num { font-size: 26px; font-weight: 700; }
+.weekly-label { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.wc-primary .weekly-num { color: var(--primary); }
+.wc-accent  .weekly-num { color: var(--accent); }
+.wc-teal    .weekly-num { color: var(--teal); }
+
+/* Pending activities */
+.activity-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 32px; }
+.activity-item {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  display: flex; align-items: center; gap: 14px;
+}
+.activity-item.urgent { border-color: #fca5a5; background: #fff5f5; }
+.ai-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.ai-content { flex: 1; }
+.ai-title { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.ai-sub { font-size: 12px; color: var(--muted); }
+.ai-action {
+  font-size: 13px; font-weight: 600; color: var(--primary);
+  background: none; border: none; cursor: pointer; padding: 6px 12px;
+  border-radius: 6px; transition: background .14s;
+}
+.ai-action:hover { background: #eff6ff; }
+
+/* Btn */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 8px;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; border: none;
+  transition: background .14s, opacity .14s;
+  text-decoration: none;
+}
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-h); }
+.btn-ghost {
+  background: transparent; color: var(--primary);
+  border: 1.5px solid var(--primary);
+}
+.btn-ghost:hover { background: #eff6ff; }
+.btn-muted { background: #f3f4f6; color: var(--text); border: 1.5px solid var(--border); }
+.btn-muted:hover { background: #e5e7eb; }
+
+/* Proto badge */
+.proto-badge {
+  position: fixed; bottom: 20px; right: 20px;
+  background: #1f2937; color: #fff;
+  font-size: 11px; font-weight: 600;
+  padding: 6px 14px; border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.3);
+  z-index: 100; pointer-events: none;
+}
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: #1f2937; color: #fff;
+  padding: 10px 20px; border-radius: 8px; font-size: 13px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.3);
+  transition: transform .3s; z-index: 200;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">AI2Learn</div>
+  <div class="header-badge">PROTOTIPO</div>
+  <div class="header-user">
+    <div class="avatar">AG</div>
+    <span>Ana García</span>
+  </div>
+</header>
+
+<nav class="nav-tabs">
+  <a class="nav-tab active" href="#">🏠 Inicio</a>
+  <a class="nav-tab" href="#" onclick="showToast('Vista de calendario — pendiente de prototipo'); return false;">📅 Calendario</a>
+  <a class="nav-tab" href="#" onclick="showToast('Mensajes — pendiente de prototipo'); return false;">💬 Mensajes</a>
+  <a class="nav-tab" href="#" onclick="showToast('Tu historial de exploración — pendiente de prototipo'); return false;">🗺 Mi mapa global</a>
+</nav>
+
+<main>
+
+  <!-- Agent strip -->
+  <div class="agent-strip">
+    <div class="as-icon">🤖</div>
+    <div class="as-body">
+      <div class="as-label">Tu agente de aprendizaje</div>
+      <p>Tienes un quiz pendiente en <strong>Fundamentos de Programación</strong> y el plazo del trabajo de <strong>Bases de Datos</strong> es en 3 días. Te sugiero priorizar el trabajo hoy.</p>
+      <div class="as-actions">
+        <a class="btn btn-primary" href="../estudiante/index.html">Ir al quiz →</a>
+        <button class="btn btn-ghost" onclick="showToast('Vista del trabajo de BBDD — pendiente de prototipo')">Ver trabajo de BBDD</button>
+        <button class="btn btn-muted" onclick="this.closest('.agent-strip').style.display='none'">Descartar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Weekly summary -->
+  <div class="section-head" style="margin-bottom:12px">
+    <h2>Esta semana</h2>
+  </div>
+  <div class="weekly-grid">
+    <div class="weekly-card wc-primary">
+      <div class="weekly-num">3</div>
+      <div class="weekly-label">Actividades completadas</div>
+    </div>
+    <div class="weekly-card wc-accent">
+      <div class="weekly-num">2</div>
+      <div class="weekly-label">Callejones explorados</div>
+    </div>
+    <div class="weekly-card wc-teal">
+      <div class="weekly-num">4.2h</div>
+      <div class="weekly-label">Tiempo de estudio</div>
+    </div>
+  </div>
+
+  <!-- Pending activities -->
+  <div class="section-head">
+    <h2>Pendiente ahora</h2>
+  </div>
+  <div class="activity-list">
+    <div class="activity-item urgent">
+      <div class="ai-dot" style="background:var(--err)"></div>
+      <div class="ai-content">
+        <div class="ai-title">Mini-quiz: Condicionales · Fundamentos de Programación</div>
+        <div class="ai-sub">Llevas 2 sesiones en este módulo — el quiz desbloquea los ejercicios</div>
+      </div>
+      <a class="ai-action" href="../estudiante/index.html">Hacer quiz →</a>
+    </div>
+    <div class="activity-item">
+      <div class="ai-dot" style="background:var(--warn)"></div>
+      <div class="ai-content">
+        <div class="ai-title">Entrega: Trabajo ER — Bases de Datos</div>
+        <div class="ai-sub">Plazo: en 3 días · Entregado 0 de 3 secciones</div>
+      </div>
+      <button class="ai-action" onclick="showToast('Prototipo de BBDD — pendiente')">Ver →</button>
+    </div>
+    <div class="activity-item">
+      <div class="ai-dot" style="background:var(--primary)"></div>
+      <div class="ai-content">
+        <div class="ai-title">Lección: Lógica proposicional — Matemáticas Discretas</div>
+        <div class="ai-sub">Siguiente bloque en tu camino estándar · ~20 min</div>
+      </div>
+      <button class="ai-action" onclick="showToast('Prototipo de Matemáticas — pendiente')">Ver →</button>
+    </div>
+  </div>
+
+  <!-- Subjects -->
+  <div class="section-head">
+    <h2>Tus asignaturas</h2>
+    <a href="#" onclick="showToast('Vista de todas las asignaturas del cuatrimestre'); return false;">Ver todas</a>
+  </div>
+  <div class="subjects-grid">
+
+    <!-- Fundamentos de Programación — enlaza al prototipo existente -->
+    <a class="subject-card active-subject" href="../estudiante/index.html">
+      <div class="sc-stripe" style="background:var(--primary)"></div>
+      <div class="sc-body">
+        <div class="sc-meta">
+          <div class="sc-dept">Informática · 1º</div>
+          <div class="sc-badge badge-active">Quiz pendiente</div>
+        </div>
+        <div class="sc-title">Fundamentos de Programación</div>
+        <div class="sc-teacher">Prof. Martínez García</div>
+        <div class="sc-progress">
+          <div class="sc-progress-top"><span>Módulo 2 de 7</span><span>28%</span></div>
+          <div class="sc-bar-wrap"><div class="sc-bar-fill" style="width:28%;background:var(--primary)"></div></div>
+        </div>
+        <div class="sc-next">
+          <div class="next-label">Siguiente</div>
+          Mini-quiz: Condicionales · 3 preguntas
+        </div>
+        <div class="sc-detour teal">🔭 Callejón disponible</div>
+      </div>
+      <div class="sc-footer">
+        <div class="sc-last">Última actividad: hoy</div>
+        <div class="sc-cta">Continuar →</div>
+      </div>
+    </a>
+
+    <!-- Bases de Datos -->
+    <div class="subject-card" onclick="showToast('Prototipo de Bases de Datos — pendiente de crear')">
+      <div class="sc-stripe" style="background:var(--warn)"></div>
+      <div class="sc-body">
+        <div class="sc-meta">
+          <div class="sc-dept">Informática · 2º</div>
+          <div class="sc-badge badge-warn">Entrega en 3 días</div>
+        </div>
+        <div class="sc-title">Bases de Datos</div>
+        <div class="sc-teacher">Prof. Sánchez Ruiz</div>
+        <div class="sc-progress">
+          <div class="sc-progress-top"><span>Tema 4 de 8</span><span>52%</span></div>
+          <div class="sc-bar-wrap"><div class="sc-bar-fill" style="width:52%;background:var(--warn)"></div></div>
+        </div>
+        <div class="sc-next">
+          <div class="next-label">Pendiente</div>
+          Entrega trabajo diagrama ER — Sección 2 y 3 sin completar
+        </div>
+      </div>
+      <div class="sc-footer">
+        <div class="sc-last">Hace 2 días</div>
+        <div class="sc-cta">Ver →</div>
+      </div>
+    </div>
+
+    <!-- Matemáticas Discretas -->
+    <div class="subject-card" onclick="showToast('Prototipo de Matemáticas — pendiente de crear')">
+      <div class="sc-stripe" style="background:var(--accent)"></div>
+      <div class="sc-body">
+        <div class="sc-meta">
+          <div class="sc-dept">Informática · 1º</div>
+          <div class="sc-badge badge-muted">Al día</div>
+        </div>
+        <div class="sc-title">Matemáticas Discretas</div>
+        <div class="sc-teacher">Prof. Gómez Alonso</div>
+        <div class="sc-progress">
+          <div class="sc-progress-top"><span>Tema 3 de 6</span><span>45%</span></div>
+          <div class="sc-bar-wrap"><div class="sc-bar-fill" style="width:45%;background:var(--accent)"></div></div>
+        </div>
+        <div class="sc-next">
+          <div class="next-label">Siguiente</div>
+          Lección: Lógica proposicional · ~20 min
+        </div>
+        <div class="sc-detour">🧩 Callejón de profundización disponible</div>
+      </div>
+      <div class="sc-footer">
+        <div class="sc-last">Hace 1 día</div>
+        <div class="sc-cta">Continuar →</div>
+      </div>
+    </div>
+
+    <!-- Inglés Técnico -->
+    <div class="subject-card" onclick="showToast('Prototipo de Inglés Técnico — pendiente de crear')">
+      <div class="sc-stripe" style="background:var(--teal)"></div>
+      <div class="sc-body">
+        <div class="sc-meta">
+          <div class="sc-dept">Transversal · 1º</div>
+          <div class="sc-badge badge-ok">Sin pendientes</div>
+        </div>
+        <div class="sc-title">Inglés Técnico para Ingeniería</div>
+        <div class="sc-teacher">Prof. Williams</div>
+        <div class="sc-progress">
+          <div class="sc-progress-top"><span>Unit 5 de 10</span><span>50%</span></div>
+          <div class="sc-bar-wrap"><div class="sc-bar-fill" style="width:50%;background:var(--teal)"></div></div>
+        </div>
+        <div class="sc-next">
+          <div class="next-label">Siguiente</div>
+          Reading: Technical Specifications · ~15 min
+        </div>
+      </div>
+      <div class="sc-footer">
+        <div class="sc-last">Hace 3 días</div>
+        <div class="sc-cta">Continuar →</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Back link -->
+  <div style="text-align:center">
+    <a href="../index.html" class="btn btn-muted">← Volver a prototipos</a>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+<div class="proto-badge">PROTOTIPO DESECHABLE</div>
+
+<script>
+let toastTimer;
+function showToast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 2800);
+}
+</script>
+</body>
+</html>

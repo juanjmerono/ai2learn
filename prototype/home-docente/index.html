@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<!-- PROTOTIPO DESECHABLE — no promover a producción -->
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI2Learn — Inicio Docente</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:        #f5f4f1;
+  --surface:   #ffffff;
+  --border:    #e2e0db;
+  --primary:   #2563eb;
+  --primary-h: #1d4ed8;
+  --accent:    #7c3aed;
+  --accent-bg: #faf5ff;
+  --teal:      #0d9488;
+  --teal-bg:   #f0fdfa;
+  --warn:      #d97706;
+  --warn-bg:   #fffbeb;
+  --ok:        #16a34a;
+  --ok-bg:     #f0fdf4;
+  --err:       #dc2626;
+  --muted:     #6b7280;
+  --text:      #111827;
+  --radius:    10px;
+  --shadow:    0 1px 4px rgba(0,0,0,.08);
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  height: 56px;
+  display: flex; align-items: center; gap: 16px;
+  position: sticky; top: 0; z-index: 50;
+}
+.logo { font-weight: 700; font-size: 18px; color: var(--primary); letter-spacing: -.5px; flex-shrink: 0; }
+.header-badge {
+  background: #fee2e2; color: #991b1b;
+  font-size: 11px; font-weight: 600;
+  padding: 2px 8px; border-radius: 20px;
+}
+.header-user {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 14px; color: var(--muted); margin-left: auto;
+}
+.avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--primary); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 13px;
+}
+
+.nav-tabs {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px; display: flex; gap: 0;
+}
+.nav-tab {
+  padding: 12px 18px;
+  font-size: 14px; font-weight: 500;
+  color: var(--muted); cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color .15s, border-color .15s;
+  text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+}
+.nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+.nav-tab:hover:not(.active) { color: var(--text); }
+
+main { max-width: 960px; margin: 0 auto; padding: 28px 24px 80px; }
+
+/* Section header */
+.section-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.section-head h2 { font-size: 17px; font-weight: 700; }
+.section-head a { font-size: 13px; color: var(--primary); text-decoration: none; }
+
+/* Alert strip — summary alerts across all subjects */
+.alerts-summary {
+  background: var(--warn-bg);
+  border: 1.5px solid #fde68a;
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  margin-bottom: 24px;
+  display: flex; align-items: flex-start; gap: 12px;
+}
+.as-icon { font-size: 26px; flex-shrink: 0; margin-top: 2px; }
+.as-body { flex: 1; }
+.as-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--warn); margin-bottom: 4px; }
+.as-body p { font-size: 14px; line-height: 1.6; color: var(--text); }
+.as-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+
+/* Stat grid */
+.stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 32px; }
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px; text-align: center;
+}
+.stat-num { font-size: 26px; font-weight: 700; }
+.stat-label { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.sc-primary .stat-num { color: var(--primary); }
+.sc-warn    .stat-num { color: var(--warn); }
+.sc-ok      .stat-num { color: var(--ok); }
+.sc-muted   .stat-num { color: var(--muted); }
+
+/* Subject cards */
+.subjects-list { display: flex; flex-direction: column; gap: 14px; margin-bottom: 32px; }
+
+.subject-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  transition: box-shadow .2s;
+}
+.subject-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,.12); }
+.subject-card.has-alerts { border-color: #fde68a; }
+.subject-card.has-draft  { border-color: #ddd6fe; }
+
+.sc-header {
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px 20px; cursor: pointer;
+}
+.sc-stripe-vert {
+  width: 4px; height: 40px; border-radius: 2px; flex-shrink: 0;
+}
+.sc-info { flex: 1; }
+.sc-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 3px; }
+.sc-title { font-size: 16px; font-weight: 700; }
+.sc-dept  { font-size: 12px; color: var(--muted); }
+.sc-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+.badge {
+  font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px;
+}
+.badge-alert  { background: var(--warn-bg); color: var(--warn); }
+.badge-ok     { background: var(--ok-bg); color: var(--ok); }
+.badge-draft  { background: var(--accent-bg); color: var(--accent); }
+.badge-muted  { background: #f3f4f6; color: var(--muted); }
+
+.sc-sub { font-size: 13px; color: var(--muted); }
+
+.sc-stats {
+  display: flex; align-items: center; gap: 16px; flex-shrink: 0;
+}
+.sc-stat { text-align: center; }
+.sc-stat-num { font-size: 18px; font-weight: 700; }
+.sc-stat-lbl { font-size: 11px; color: var(--muted); }
+.sc-stat.ok   .sc-stat-num { color: var(--ok); }
+.sc-stat.warn .sc-stat-num { color: var(--warn); }
+.sc-stat.muted .sc-stat-num { color: var(--muted); }
+
+.sc-action-col { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; flex-shrink: 0; }
+
+/* Expanded panel */
+.sc-expand {
+  display: none;
+  border-top: 1px solid var(--border);
+  padding: 16px 20px;
+  background: #fafaf9;
+}
+.sc-expand.open { display: block; }
+
+.alert-row {
+  background: var(--warn-bg);
+  border: 1px solid #fde68a;
+  border-radius: 8px; padding: 10px 14px;
+  display: flex; align-items: flex-start; gap: 10px;
+  margin-bottom: 8px;
+}
+.alert-row:last-child { margin-bottom: 0; }
+.ar-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+.ar-body { flex: 1; }
+.ar-title { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.ar-sub   { font-size: 12px; color: var(--muted); }
+.ar-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+
+/* Btn */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: 7px;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; border: none;
+  transition: background .14s, opacity .14s;
+  text-decoration: none;
+}
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-h); }
+.btn-ghost {
+  background: transparent; color: var(--primary);
+  border: 1.5px solid var(--primary);
+}
+.btn-ghost:hover { background: #eff6ff; }
+.btn-muted { background: #f3f4f6; color: var(--text); border: 1.5px solid var(--border); }
+.btn-muted:hover { background: #e5e7eb; }
+.btn-warn { background: var(--warn); color: #fff; }
+.btn-sm { padding: 5px 11px; font-size: 12px; }
+.btn-new {
+  background: var(--primary); color: #fff !important;
+  padding: 9px 20px; border-radius: 8px;
+  font-size: 14px; font-weight: 700; border: none; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 8px;
+  text-decoration: none;
+  transition: background .14s;
+}
+.btn-new:hover { background: var(--primary-h); color: #fff !important; }
+
+/* Proto badge */
+.proto-badge {
+  position: fixed; bottom: 20px; right: 20px;
+  background: #1f2937; color: #fff;
+  font-size: 11px; font-weight: 600;
+  padding: 6px 14px; border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.3);
+  z-index: 100; pointer-events: none;
+}
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: #1f2937; color: #fff;
+  padding: 10px 20px; border-radius: 8px; font-size: 13px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.3);
+  transition: transform .3s; z-index: 200;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+@media (max-width: 640px) {
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .sc-stats { display: none; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">AI2Learn</div>
+  <div class="header-badge">PROTOTIPO</div>
+  <div class="header-user">
+    <div class="avatar">MG</div>
+    <span>Prof. Martínez García</span>
+  </div>
+</header>
+
+<nav class="nav-tabs">
+  <a class="nav-tab active" href="#">🏠 Mis asignaturas</a>
+  <a class="nav-tab" href="#" onclick="showToast('Agenda de clase — pendiente de prototipo'); return false;">📅 Agenda</a>
+  <a class="nav-tab" href="#" onclick="showToast('Conversaciones elevadas — pendiente de prototipo'); return false;">💬 Conversaciones (2)</a>
+  <a class="nav-tab" href="#" onclick="showToast('Analítica global — pendiente de prototipo'); return false;">📊 Analítica global</a>
+</nav>
+
+<main>
+
+  <!-- Alerts summary across all subjects -->
+  <div class="alerts-summary">
+    <div class="as-icon">🤖</div>
+    <div class="as-body">
+      <div class="as-label">Agente instructional designer · resumen de hoy</div>
+      <p>Hay <strong>5 estudiantes sin avanzar más de 10 días</strong> repartidos en 2 asignaturas. En <strong>Programación Orientada a Objetos</strong> el 42% falla la evaluación del módulo de herencia. El agente propone acciones concretas en cada asignatura.</p>
+      <div class="as-actions">
+        <button class="btn btn-primary btn-sm" onclick="expandAll()">Ver todas las alertas</button>
+        <button class="btn btn-muted btn-sm" onclick="showToast('Resumen enviado por email')">Enviarme resumen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Global stats -->
+  <div class="section-head" style="margin-bottom:12px">
+    <h2>Visión global · Semana 6</h2>
+  </div>
+  <div class="stat-grid">
+    <div class="stat-card sc-primary">
+      <div class="stat-num">73</div>
+      <div class="stat-label">Estudiantes totales</div>
+    </div>
+    <div class="stat-card sc-ok">
+      <div class="stat-num">61</div>
+      <div class="stat-label">Al día en todas las asign.</div>
+    </div>
+    <div class="stat-card sc-warn">
+      <div class="stat-num">5</div>
+      <div class="stat-label">Necesitan atención</div>
+    </div>
+    <div class="stat-card sc-muted">
+      <div class="stat-num">7</div>
+      <div class="stat-label">Alertas activas</div>
+    </div>
+  </div>
+
+  <!-- Subjects list -->
+  <div class="section-head">
+    <h2>Asignaturas este cuatrimestre</h2>
+    <a class="btn-new" href="../docente/index.html">+ Nueva asignatura</a>
+  </div>
+
+  <div class="subjects-list">
+
+    <!-- 1 — Fundamentos de Programación (enlaza al prototipo existente) -->
+    <div class="subject-card has-alerts" id="card-1">
+      <div class="sc-header" onclick="toggleCard(1)">
+        <div class="sc-stripe-vert" style="background:var(--primary)"></div>
+        <div class="sc-info">
+          <div class="sc-top">
+            <div class="sc-title">Fundamentos de Programación</div>
+            <div class="sc-dept">Grado Informática · 1º · Sem. A</div>
+          </div>
+          <div class="sc-badges">
+            <span class="badge badge-alert">⚠ 3 sin avanzar</span>
+            <span class="badge badge-alert">📊 38% falla Módulo 3</span>
+            <span class="badge badge-ok">Semana 6 de 14</span>
+          </div>
+        </div>
+        <div class="sc-stats">
+          <div class="sc-stat ok">
+            <div class="sc-stat-num">18</div>
+            <div class="sc-stat-lbl">Al día</div>
+          </div>
+          <div class="sc-stat warn">
+            <div class="sc-stat-num">5</div>
+            <div class="sc-stat-lbl">Atención</div>
+          </div>
+          <div class="sc-stat muted">
+            <div class="sc-stat-num">2</div>
+            <div class="sc-stat-lbl">Inactivos</div>
+          </div>
+        </div>
+        <div class="sc-action-col">
+          <a class="btn btn-primary btn-sm" href="../docente/index.html" onclick="event.stopPropagation()">Abrir dashboard →</a>
+          <button class="btn btn-muted btn-sm" onclick="event.stopPropagation(); toggleCard(1)">Ver alertas ▾</button>
+        </div>
+      </div>
+      <div class="sc-expand" id="expand-1">
+        <div class="alert-row">
+          <div class="ar-icon">🔴</div>
+          <div class="ar-body">
+            <div class="ar-title">3 estudiantes llevan más de 10 días sin avanzar en el Módulo 2</div>
+            <div class="ar-sub">Carlos López · Luis Fernández · Sofía Martín</div>
+            <div class="ar-actions">
+              <button class="btn btn-primary btn-sm" onclick="showToast('Material de refuerzo generado para Módulo 2')">Generar material de refuerzo</button>
+              <button class="btn btn-muted btn-sm" onclick="showToast('Enviando mensaje a los 3 estudiantes...')">Enviarles un mensaje</button>
+            </div>
+          </div>
+        </div>
+        <div class="alert-row" style="margin-top:8px">
+          <div class="ar-icon">🟡</div>
+          <div class="ar-body">
+            <div class="ar-title">El 38% de la clase falla la evaluación del Módulo 3 — Bucles y funciones</div>
+            <div class="ar-sub">El agente detecta alta tasa de error en ejercicios de recursividad</div>
+            <div class="ar-actions">
+              <button class="btn btn-primary btn-sm" onclick="showToast('Mini-quiz añadido antes del examen del Módulo 3')">Añadir mini-quiz previo</button>
+              <button class="btn btn-ghost btn-sm" onclick="showToast('Revisando ejercicios de recursividad...')">Revisar ejercicios</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2 — POO -->
+    <div class="subject-card has-alerts" id="card-2">
+      <div class="sc-header" onclick="toggleCard(2)">
+        <div class="sc-stripe-vert" style="background:var(--accent)"></div>
+        <div class="sc-info">
+          <div class="sc-top">
+            <div class="sc-title">Programación Orientada a Objetos</div>
+            <div class="sc-dept">Grado Informática · 2º · Sem. A</div>
+          </div>
+          <div class="sc-badges">
+            <span class="badge badge-alert">⚠ 42% falla módulo herencia</span>
+            <span class="badge badge-ok">Semana 5 de 12</span>
+          </div>
+        </div>
+        <div class="sc-stats">
+          <div class="sc-stat ok">
+            <div class="sc-stat-num">14</div>
+            <div class="sc-stat-lbl">Al día</div>
+          </div>
+          <div class="sc-stat warn">
+            <div class="sc-stat-num">8</div>
+            <div class="sc-stat-lbl">Dificultades</div>
+          </div>
+          <div class="sc-stat muted">
+            <div class="sc-stat-num">1</div>
+            <div class="sc-stat-lbl">Inactivo</div>
+          </div>
+        </div>
+        <div class="sc-action-col">
+          <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); showToast('Dashboard de POO — pendiente de prototipo')">Abrir dashboard →</button>
+          <button class="btn btn-muted btn-sm" onclick="event.stopPropagation(); toggleCard(2)">Ver alertas ▾</button>
+        </div>
+      </div>
+      <div class="sc-expand" id="expand-2">
+        <div class="alert-row">
+          <div class="ar-icon">🟡</div>
+          <div class="ar-body">
+            <div class="ar-title">El 42% de los estudiantes no supera el ejercicio de herencia múltiple</div>
+            <div class="ar-sub">Módulo 4 — Herencia y polimorfismo · 8 estudiantes afectados</div>
+            <div class="ar-actions">
+              <button class="btn btn-primary btn-sm" onclick="showToast('Callejón de refuerzo generado para herencia múltiple')">Generar callejón de refuerzo</button>
+              <button class="btn btn-ghost btn-sm" onclick="showToast('Abriendo editor del Módulo 4...')">Editar módulo</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 — Algoritmos (en creación, enlaza al prototipo docente) -->
+    <div class="subject-card has-draft" id="card-3">
+      <div class="sc-header" onclick="toggleCard(3)">
+        <div class="sc-stripe-vert" style="background:var(--teal)"></div>
+        <div class="sc-info">
+          <div class="sc-top">
+            <div class="sc-title">Algoritmos y Estructuras de Datos</div>
+            <div class="sc-dept">Grado Informática · 2º · Sem. B — empieza en feb.</div>
+          </div>
+          <div class="sc-badges">
+            <span class="badge badge-draft">✏️ En preparación</span>
+            <span class="badge badge-muted">Publicar antes del 1 feb</span>
+          </div>
+        </div>
+        <div class="sc-stats">
+          <div class="sc-stat muted">
+            <div class="sc-stat-num">—</div>
+            <div class="sc-stat-lbl">Matriculados</div>
+          </div>
+          <div class="sc-stat muted">
+            <div class="sc-stat-num">5/7</div>
+            <div class="sc-stat-lbl">Módulos listos</div>
+          </div>
+        </div>
+        <div class="sc-action-col">
+          <a class="btn btn-primary btn-sm" href="../docente/index.html" onclick="event.stopPropagation()">Continuar diseño →</a>
+        </div>
+      </div>
+      <div class="sc-expand" id="expand-3">
+        <div style="font-size:13px;color:var(--muted);padding:4px 0">
+          Módulos listos: 1 · 2 · 3 · 4 · 5 &nbsp;|&nbsp; Pendientes: <strong>6 — Grafos</strong> y <strong>7 — Examen final</strong><br>
+          El agente tiene una propuesta para ambos módulos. Ábrela para revisarla.
+        </div>
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <a class="btn btn-primary btn-sm" href="../docente/index.html">Revisar propuesta del agente →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 — Optativa sin alertas -->
+    <div class="subject-card" id="card-4">
+      <div class="sc-header" onclick="toggleCard(4)">
+        <div class="sc-stripe-vert" style="background:var(--ok)"></div>
+        <div class="sc-info">
+          <div class="sc-top">
+            <div class="sc-title">Seminario: Introducción a la IA</div>
+            <div class="sc-dept">Optativa · 4º · Sem. A</div>
+          </div>
+          <div class="sc-badges">
+            <span class="badge badge-ok">Sin alertas</span>
+            <span class="badge badge-ok">Semana 6 de 8</span>
+          </div>
+        </div>
+        <div class="sc-stats">
+          <div class="sc-stat ok">
+            <div class="sc-stat-num">12</div>
+            <div class="sc-stat-lbl">Al día</div>
+          </div>
+          <div class="sc-stat muted">
+            <div class="sc-stat-num">0</div>
+            <div class="sc-stat-lbl">Atención</div>
+          </div>
+        </div>
+        <div class="sc-action-col">
+          <button class="btn btn-muted btn-sm" onclick="event.stopPropagation(); showToast('Dashboard del Seminario — pendiente de prototipo')">Abrir dashboard</button>
+        </div>
+      </div>
+      <div class="sc-expand" id="expand-4">
+        <div style="font-size:13px;color:var(--muted)">Todo va bien. El agente no detecta ningún bloqueo. El grupo avanza por encima de la media esperada para esta semana.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Back link -->
+  <div style="text-align:center">
+    <a href="../index.html" class="btn btn-muted">← Volver a prototipos</a>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+<div class="proto-badge">PROTOTIPO DESECHABLE</div>
+
+<script>
+function toggleCard(id) {
+  const panel = document.getElementById(`expand-${id}`);
+  panel.classList.toggle("open");
+}
+
+function expandAll() {
+  [1,2,3,4].forEach(id => {
+    const panel = document.getElementById(`expand-${id}`);
+    if (panel) panel.classList.add("open");
+  });
+  showToast("Todas las alertas expandidas");
+}
+
+let toastTimer;
+function showToast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 2800);
+}
+</script>
+</body>
+</html>
