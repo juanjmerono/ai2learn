@@ -16,3 +16,5 @@ idea difusa
     ↓
 /code-review     ←  antes de cada commit
 
+## Validando la idea
+
