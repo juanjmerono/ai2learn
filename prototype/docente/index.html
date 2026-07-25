@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<!-- PROTOTIPO DESECHABLE — no promover a producción -->
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI2Learn — Prototipo Docente</title>
+<style>
+  /* ──────────────────────────────────────────────
+     Reset & tokens
+  ────────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:        #f5f4f1;
+    --surface:   #ffffff;
+    --border:    #e2e0db;
+    --primary:   #2563eb;
+    --primary-h: #1d4ed8;
+    --accent:    #7c3aed;
+    --warn:      #d97706;
+    --warn-bg:   #fffbeb;
+    --ok:        #16a34a;
+    --ok-bg:     #f0fdf4;
+    --muted:     #6b7280;
+    --text:      #111827;
+    --radius:    10px;
+    --shadow:    0 1px 4px rgba(0,0,0,.08);
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ──────────────────────────────────────────────
+     Layout
+  ────────────────────────────────────────────── */
+  .app-shell { display: flex; flex-direction: column; min-height: 100vh; }
+
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky; top: 0; z-index: 50;
+  }
+  .logo { font-weight: 700; font-size: 18px; color: var(--primary); letter-spacing: -.5px; }
+  .header-badge {
+    background: #fee2e2; color: #991b1b;
+    font-size: 11px; font-weight: 600;
+    padding: 2px 8px; border-radius: 20px;
+  }
+  .header-user {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 14px; color: var(--muted);
+  }
+  .avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--primary); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px;
+  }
+
+  /* Step progress */
+  .step-bar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+  .step-item {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 500; color: var(--muted);
+    padding: 0 16px;
+    position: relative;
+  }
+  .step-item.active { color: var(--primary); }
+  .step-item.done   { color: var(--ok); }
+  .step-num {
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid currentColor;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .step-item.done .step-num { background: var(--ok); border-color: var(--ok); color: #fff; }
+  .step-item.active .step-num { background: var(--primary); border-color: var(--primary); color: #fff; }
+  .step-sep { width: 32px; height: 2px; background: var(--border); }
+  .step-item.done + .step-sep { background: var(--ok); }
+
+  main { flex: 1; padding: 32px 24px; max-width: 900px; margin: 0 auto; width: 100%; }
+
+  /* ──────────────────────────────────────────────
+     Screens
+  ────────────────────────────────────────────── */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ──────────────────────────────────────────────
+     Cards & surfaces
+  ────────────────────────────────────────────── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 24px;
+  }
+  .card + .card { margin-top: 16px; }
+
+  /* ──────────────────────────────────────────────
+     Typography helpers
+  ────────────────────────────────────────────── */
+  h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  h2 { font-size: 17px; font-weight: 700; margin-bottom: 12px; }
+  h3 { font-size: 15px; font-weight: 600; }
+  p  { font-size: 14px; line-height: 1.6; color: var(--muted); }
+  .label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin-bottom: 6px; }
+
+  /* ──────────────────────────────────────────────
+     Buttons
+  ────────────────────────────────────────────── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 18px; border-radius: 8px;
+    font-size: 14px; font-weight: 600;
+    cursor: pointer; border: none; transition: background .15s, opacity .15s;
+  }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-primary:hover:not(:disabled) { background: var(--primary-h); }
+  .btn-ghost {
+    background: transparent; color: var(--primary);
+    border: 1.5px solid var(--primary);
+  }
+  .btn-ghost:hover:not(:disabled) { background: #eff6ff; }
+  .btn-muted {
+    background: #f3f4f6; color: var(--text);
+    border: 1.5px solid var(--border);
+  }
+  .btn-muted:hover:not(:disabled) { background: #e5e7eb; }
+  .btn-warn { background: var(--warn); color: #fff; }
+  .btn-warn:hover { background: #b45309; }
+  .btn-sm { padding: 5px 12px; font-size: 13px; }
+  .btn-icon { padding: 6px; border-radius: 6px; line-height: 1; }
+
+  /* ──────────────────────────────────────────────
+     Forms
+  ────────────────────────────────────────────── */
+  textarea, input[type=text] {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 14px; font-family: inherit;
+    resize: vertical;
+    outline: none;
+    transition: border .15s;
+    background: #fafafa;
+  }
+  textarea:focus, input[type=text]:focus { border-color: var(--primary); background: #fff; }
+
+  /* ──────────────────────────────────────────────
+     Upload zone
+  ────────────────────────────────────────────── */
+  .upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 36px 24px;
+    text-align: center;
+    color: var(--muted);
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+  }
+  .upload-zone:hover, .upload-zone.drag-over {
+    border-color: var(--primary);
+    background: #eff6ff;
+  }
+  .upload-zone .upload-icon { font-size: 36px; margin-bottom: 8px; }
+  .upload-zone p { margin: 0; font-size: 13px; }
+  .file-list { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+  .file-chip {
+    display: flex; align-items: center; gap: 8px;
+    background: #f3f4f6; border-radius: 6px;
+    padding: 6px 10px; font-size: 13px;
+  }
+  .file-chip .remove {
+    margin-left: auto; cursor: pointer; color: var(--muted);
+    font-size: 16px; line-height: 1; border: none; background: none;
+  }
+
+  /* ──────────────────────────────────────────────
+     Chat (agente)
+  ────────────────────────────────────────────── */
+  .chat-container {
+    display: flex; flex-direction: column; gap: 12px;
+    max-height: 380px; overflow-y: auto;
+    padding: 4px 0;
+  }
+  .bubble {
+    display: flex; flex-direction: column; gap: 2px;
+    max-width: 80%;
+  }
+  .bubble.agent { align-self: flex-start; }
+  .bubble.user  { align-self: flex-end; }
+  .bubble-label { font-size: 11px; color: var(--muted); padding: 0 4px; }
+  .bubble-body {
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 14px; line-height: 1.6;
+  }
+  .agent .bubble-body {
+    background: #f3f4f6;
+    border-bottom-left-radius: 4px;
+  }
+  .user .bubble-body {
+    background: var(--primary); color: #fff;
+    border-bottom-right-radius: 4px;
+  }
+  .agent .bubble-body a { color: var(--primary); }
+
+  .chat-input-row {
+    display: flex; gap: 8px; margin-top: 12px;
+  }
+  .chat-input-row textarea { min-height: 44px; resize: none; }
+
+  /* typing indicator */
+  .typing { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
+  .typing span {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--muted); animation: bounce .9s infinite;
+  }
+  .typing span:nth-child(2) { animation-delay: .15s; }
+  .typing span:nth-child(3) { animation-delay: .3s; }
+  @keyframes bounce {
+    0%,80%,100% { transform: translateY(0); }
+    40%          { transform: translateY(-6px); }
+  }
+
+  /* ──────────────────────────────────────────────
+     Module list
+  ────────────────────────────────────────────── */
+  .module-list { display: flex; flex-direction: column; gap: 10px; }
+  .module-item {
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    background: var(--surface);
+    cursor: grab;
+    transition: box-shadow .15s;
+    position: relative;
+  }
+  .module-item:hover { box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+  .module-item.editing { border-color: var(--primary); box-shadow: 0 0 0 2px #bfdbfe; }
+  .module-header { display: flex; align-items: flex-start; gap: 10px; }
+  .module-drag { color: var(--muted); font-size: 18px; cursor: grab; flex-shrink: 0; margin-top: 2px; }
+  .module-title-row { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+  .module-number { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--muted); }
+  .module-title { font-size: 15px; font-weight: 600; }
+  .module-obj { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .module-footer { display: flex; align-items: center; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .tag {
+    font-size: 11px; font-weight: 600; padding: 2px 8px;
+    border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;
+  }
+  .tag-lesson { background: #eff6ff; color: var(--primary); }
+  .tag-exercise { background: #faf5ff; color: var(--accent); }
+  .tag-exam { background: var(--warn-bg); color: var(--warn); }
+  .tag-source { background: #f0fdf4; color: var(--ok); }
+  .module-actions { margin-left: auto; display: flex; gap: 4px; }
+
+  /* inline edit */
+  .module-edit-form { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .module-edit-form .row { display: flex; gap: 8px; }
+
+  /* ──────────────────────────────────────────────
+     Dashboard (Momento 2)
+  ────────────────────────────────────────────── */
+  .alert-card {
+    background: var(--warn-bg);
+    border: 1.5px solid #fde68a;
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .alert-title { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .alert-title .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--warn); flex-shrink: 0; }
+  .alert-agent-suggestion {
+    background: #fff;
+    border: 1px solid #fde68a;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px; color: var(--text);
+  }
+  .agent-label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .alert-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    text-align: center;
+  }
+  .stat-num { font-size: 28px; font-weight: 700; }
+  .stat-label { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .stat-ok  .stat-num { color: var(--ok); }
+  .stat-warn .stat-num { color: var(--warn); }
+  .stat-muted .stat-num { color: var(--muted); }
+
+  /* Student table */
+  .student-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .student-table th {
+    text-align: left; padding: 8px 12px;
+    font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .student-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+  .student-table tr:last-child td { border-bottom: none; }
+  .progress-bar-wrap { background: var(--border); border-radius: 4px; height: 6px; width: 100px; }
+  .progress-bar-fill { height: 6px; border-radius: 4px; background: var(--ok); }
+  .status-badge {
+    font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px;
+    display: inline-block;
+  }
+  .status-ok   { background: var(--ok-bg); color: var(--ok); }
+  .status-warn { background: var(--warn-bg); color: var(--warn); }
+  .status-muted { background: #f3f4f6; color: var(--muted); }
+
+  /* Collapsible */
+  .collapsible-btn {
+    background: none; border: none; cursor: pointer;
+    font-size: 14px; font-weight: 600; color: var(--primary);
+    display: flex; align-items: center; gap: 6px;
+    padding: 0; margin-top: 12px;
+  }
+  .collapsible-body { display: none; margin-top: 14px; }
+  .collapsible-body.open { display: block; }
+
+  /* ──────────────────────────────────────────────
+     Prototype badge (floating)
+  ────────────────────────────────────────────── */
+  .proto-badge {
+    position: fixed; bottom: 20px; right: 20px;
+    background: #1f2937; color: #fff;
+    font-size: 11px; font-weight: 600;
+    padding: 6px 14px; border-radius: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.3);
+    z-index: 100;
+    pointer-events: none;
+  }
+
+  /* Divider */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+  /* Utility */
+  .flex { display: flex; }
+  .items-center { align-items: center; }
+  .gap-8 { gap: 8px; }
+  .gap-12 { gap: 12px; }
+  .mt-8  { margin-top: 8px; }
+  .mt-12 { margin-top: 12px; }
+  .mt-16 { margin-top: 16px; }
+  .mt-20 { margin-top: 20px; }
+  .ml-auto { margin-left: auto; }
+  .text-muted { color: var(--muted); font-size: 13px; }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: #1f2937; color: #fff;
+    padding: 10px 20px; border-radius: 8px; font-size: 13px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.3);
+    transition: transform .3s; z-index: 200;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ══════════════════════ HEADER ══════════════════════ -->
+  <header>
+    <div class="logo">AI2Learn</div>
+    <div class="header-badge">PROTOTIPO</div>
+    <div class="header-user">
+      <div class="avatar">MG</div>
+      <span>Prof. Martínez García</span>
+    </div>
+  </header>
+
+  <!-- ══════════════════════ STEP BAR ══════════════════════ -->
+  <div class="step-bar" id="stepBar">
+    <div class="step-item" id="step1" data-screen="1">
+      <div class="step-num">1</div>
+      <span>Aportación de material</span>
+    </div>
+    <div class="step-sep"></div>
+    <div class="step-item" id="step2" data-screen="2">
+      <div class="step-num">2</div>
+      <span>Diseño con el agente</span>
+    </div>
+    <div class="step-sep"></div>
+    <div class="step-item" id="step3" data-screen="3">
+      <div class="step-num">3</div>
+      <span>Revisión y ajustes</span>
+    </div>
+    <div class="step-sep"></div>
+    <div class="step-item" id="step4" data-screen="4">
+      <div class="step-num">4</div>
+      <span>Dashboard activo</span>
+    </div>
+  </div>
+
+  <!-- ══════════════════════ MAIN CONTENT ══════════════════════ -->
+  <main>
+
+    <!-- ─────────────────── SCREEN 1: Upload material ─────────────────── -->
+    <div class="screen active" id="screen-1">
+      <h1>Nueva asignatura</h1>
+      <p style="margin-bottom:24px">Empieza aportando el material que ya tienes. El agente lo leerá y te propondrá una estructura de módulos. Tú decides qué queda.</p>
+
+      <div class="card">
+        <h2>Nombre de la asignatura</h2>
+        <input type="text" id="subjectName" placeholder="Ej: Fundamentos de Programación – Grado Informática" value="Fundamentos de Programación">
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <h2>Sube tus documentos</h2>
+        <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+          <div class="upload-icon">📂</div>
+          <p><strong>Arrastra aquí</strong> o haz clic para seleccionar</p>
+          <p style="margin-top:4px">PDF, Word, SCORM, IMS CC — cualquier combinación</p>
+        </div>
+        <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.zip" style="display:none" onchange="addFiles(this.files)">
+        <div class="file-list" id="fileList"></div>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <h2>Guía docente (texto libre)</h2>
+        <textarea id="guiaDocente" rows="4" placeholder="Pega aquí tu guía docente o describe brevemente los objetivos y contenidos de la asignatura...">Asignatura de primer curso orientada a estudiantes sin experiencia previa en programación. Se abordan los fundamentos algorítmicos, el pensamiento computacional y la práctica con Python. El objetivo es que el estudiante sea capaz de desarrollar programas sencillos de forma autónoma al finalizar el cuatrimestre.</textarea>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <h2>URLs y referencias externas <span style="font-weight:400;color:var(--muted)">(opcional)</span></h2>
+        <textarea id="urls" rows="2" placeholder="https://... una por línea"></textarea>
+      </div>
+
+      <div class="flex mt-20" style="justify-content:flex-end">
+        <button class="btn btn-primary" onclick="goToScreen(2)">
+          Continuar — diseñar con el agente →
+        </button>
+      </div>
+    </div>
+
+    <!-- ─────────────────── SCREEN 2: Chat con agente ─────────────────── -->
+    <div class="screen" id="screen-2">
+      <h1>Diseño con el agente</h1>
+      <p style="margin-bottom:24px">El agente ha analizado tu material y te propone una primera estructura. Refinala con instrucciones en lenguaje natural.</p>
+
+      <div class="card">
+        <div class="label">Conversación con el agente instructional designer</div>
+        <div class="chat-container" id="chatContainer">
+          <!-- messages injected by JS -->
+        </div>
+        <div class="chat-input-row">
+          <textarea id="chatInput" rows="2" placeholder='Ej: "cambia el tono del módulo 2", "añade un ejercicio práctico al final", "fusiona los módulos 3 y 4"...'></textarea>
+          <button class="btn btn-primary" onclick="sendMessage()" id="sendBtn">Enviar</button>
+        </div>
+      </div>
+
+      <div class="flex mt-20 gap-8" style="justify-content:space-between">
+        <button class="btn btn-muted" onclick="goToScreen(1)">← Volver</button>
+        <button class="btn btn-primary" onclick="goToScreen(3)">Ver estructura y editar →</button>
+      </div>
+    </div>
+
+    <!-- ─────────────────── SCREEN 3: Module review & edit ─────────────────── -->
+    <div class="screen" id="screen-3">
+      <div class="flex items-center gap-12" style="margin-bottom:8px">
+        <h1 style="margin:0">Estructura propuesta</h1>
+        <span class="status-badge status-ok" style="font-size:12px">7 módulos · ~14 semanas</span>
+      </div>
+      <p style="margin-bottom:24px">Revisa cada módulo. Arrastra para reordenar. Edita cualquier campo o añade nuevos módulos. El agente respetará tus cambios.</p>
+
+      <div class="module-list" id="moduleList">
+        <!-- modules injected by JS -->
+      </div>
+
+      <div class="flex mt-16 gap-8">
+        <button class="btn btn-ghost" onclick="addModule()">+ Añadir módulo</button>
+      </div>
+
+      <hr class="divider">
+
+      <div class="flex mt-20 gap-8" style="justify-content:space-between">
+        <button class="btn btn-muted" onclick="goToScreen(2)">← Volver al chat</button>
+        <button class="btn btn-primary" onclick="publishCourse()">Publicar asignatura →</button>
+      </div>
+    </div>
+
+    <!-- ─────────────────── SCREEN 4: Dashboard activo ─────────────────── -->
+    <div class="screen" id="screen-4">
+      <div class="flex items-center gap-12" style="margin-bottom:4px">
+        <h1 style="margin:0" id="dashSubjectName">Fundamentos de Programación</h1>
+        <span class="status-badge status-ok" style="font-size:12px">Semana 6 de 14</span>
+      </div>
+      <p style="margin-bottom:24px">Tu asignatura está activa. Aquí tienes lo que necesitas atender hoy.</p>
+
+      <!-- ALERTS -->
+      <div class="label">Alertas que requieren tu atención</div>
+
+      <div class="alert-card" style="margin-top:8px">
+        <div class="alert-title">
+          <div class="dot"></div>
+          3 estudiantes llevan más de 10 días sin avanzar en el Módulo 2 — Algoritmos básicos
+        </div>
+        <div class="alert-agent-suggestion">
+          <div class="agent-label">🤖 Sugerencia del agente</div>
+          Puedo generar un material de refuerzo breve (15 min) que aborda el bloque de condicionales desde un ángulo visual diferente. ¿Lo añado como recurso opcional al módulo 2?
+        </div>
+        <div class="alert-actions">
+          <button class="btn btn-primary btn-sm" onclick="acceptSuggestion(this, 'refuerzo')">Sí, genera el material</button>
+          <button class="btn btn-muted btn-sm" onclick="showStudentDetail()">Ver quiénes son</button>
+          <button class="btn btn-ghost btn-sm" onclick="dismissAlert(this)">Descartar alerta</button>
+        </div>
+      </div>
+
+      <div class="alert-card" style="margin-top:12px; background: #fff7ed; border-color: #fed7aa;">
+        <div class="alert-title">
+          <div class="dot" style="background:#f97316"></div>
+          El 38% de la clase tiene dificultades con la evaluación del Módulo 3 — Bucles y funciones
+        </div>
+        <div class="alert-agent-suggestion">
+          <div class="agent-label">🤖 Sugerencia del agente</div>
+          La tasa de error en los ejercicios de recursividad es inusualmente alta. Sugiero insertar un mini-quiz de 5 preguntas antes del examen del módulo para identificar el bloqueo concreto.
+        </div>
+        <div class="alert-actions">
+          <button class="btn btn-primary btn-sm" onclick="acceptSuggestion(this, 'quiz')">Añadir mini-quiz</button>
+          <button class="btn btn-warn btn-sm" onclick="reviewExercises()">Revisar ejercicios ahora</button>
+          <button class="btn btn-ghost btn-sm" onclick="dismissAlert(this)">Descartar alerta</button>
+        </div>
+      </div>
+
+      <!-- STATS -->
+      <div class="label mt-20">Estado general de la clase</div>
+      <div class="stats-grid">
+        <div class="stat-card stat-ok">
+          <div class="stat-num">18</div>
+          <div class="stat-label">Estudiantes al día</div>
+        </div>
+        <div class="stat-card stat-warn">
+          <div class="stat-num">5</div>
+          <div class="stat-label">Necesitan atención</div>
+        </div>
+        <div class="stat-card stat-muted">
+          <div class="stat-num">2</div>
+          <div class="stat-label">Sin actividad esta semana</div>
+        </div>
+      </div>
+
+      <!-- STUDENT TABLE (collapsible) -->
+      <button class="collapsible-btn" onclick="toggleCollapsible(this)">
+        <span class="toggle-icon">▶</span> Ver detalle por estudiante
+      </button>
+      <div class="collapsible-body" id="studentTable">
+        <div class="card" style="padding:0;overflow:hidden">
+          <table class="student-table">
+            <thead>
+              <tr>
+                <th>Estudiante</th>
+                <th>Progreso</th>
+                <th>Módulo actual</th>
+                <th>Última actividad</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Ana García</strong></td>
+                <td><div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:78%"></div></div></td>
+                <td>Módulo 4</td>
+                <td>Hoy</td>
+                <td><span class="status-badge status-ok">Al día</span></td>
+              </tr>
+              <tr>
+                <td><strong>Carlos López</strong></td>
+                <td><div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:45%"></div></div></td>
+                <td>Módulo 2</td>
+                <td>Hace 12 días</td>
+                <td><span class="status-badge status-warn">Sin avanzar</span></td>
+              </tr>
+              <tr>
+                <td><strong>Marta Pérez</strong></td>
+                <td><div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:85%"></div></div></td>
+                <td>Módulo 5</td>
+                <td>Ayer</td>
+                <td><span class="status-badge status-ok">Al día</span></td>
+              </tr>
+              <tr>
+                <td><strong>Luis Fernández</strong></td>
+                <td><div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:42%"></div></div></td>
+                <td>Módulo 2</td>
+                <td>Hace 14 días</td>
+                <td><span class="status-badge status-warn">Sin avanzar</span></td>
+              </tr>
+              <tr>
+                <td><strong>Elena Ruiz</strong></td>
+                <td><div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:60%"></div></div></td>
+                <td>Módulo 3</td>
+                <td>Hace 3 días</td>
+                <td><span class="status-badge status-muted">Lenta</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- QUICK ACTIONS -->
+      <div class="label mt-20">Acciones disponibles</div>
+      <div class="flex gap-8 mt-8" style="flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" onclick="showToast('Abriendo editor de módulo 2...')">Editar contenido del módulo 2</button>
+        <button class="btn btn-ghost btn-sm" onclick="showToast('Modo: añadir material para caminos personalizados')">Añadir material para caminos personalizados</button>
+        <button class="btn btn-ghost btn-sm" onclick="showToast('Conversaciones elevadas: 1 estudiante esperando respuesta')">Ver conversaciones elevadas (1)</button>
+      </div>
+
+      <!-- nav back to creation for demo -->
+      <hr class="divider">
+      <div class="flex gap-8">
+        <button class="btn btn-muted btn-sm" onclick="goToScreen(3)">← Volver a la estructura</button>
+        <button class="btn btn-muted btn-sm ml-auto" onclick="resetAndGoTo(1)">↺ Reiniciar demo</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- toast -->
+<div class="toast" id="toast"></div>
+
+<!-- prototype badge -->
+<div class="proto-badge">PROTOTIPO DESECHABLE</div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   State
+═══════════════════════════════════════════════ */
+const MODULES_INIT = [
+  {
+    id: 1, title: "Introducción al pensamiento computacional",
+    objective: "El estudiante comprende qué es un algoritmo y puede describir problemas en términos computacionales.",
+    type: "lesson",
+    sources: ["Guía docente — sección 1", "Fuente abierta: CS50x Intro"]
+  },
+  {
+    id: 2, title: "Algoritmos básicos — condicionales y secuencias",
+    objective: "Escribir algoritmos con estructuras de control condicionales usando pseudocódigo y Python.",
+    type: "exercise",
+    sources: ["Material propio: ejercicios_cond.pdf"]
+  },
+  {
+    id: 3, title: "Bucles y funciones",
+    objective: "Usar bucles for/while y definir funciones reutilizables en Python.",
+    type: "exercise",
+    sources: ["Material propio: ejercicios_bucles.pdf", "Fuente abierta: Python Docs 3.x"]
+  },
+  {
+    id: 4, title: "Estructuras de datos: listas y diccionarios",
+    objective: "Manipular colecciones de datos básicas en Python y elegir la estructura adecuada para cada problema.",
+    type: "lesson",
+    sources: ["Material propio: slides_estructuras.pdf"]
+  },
+  {
+    id: 5, title: "Evaluación parcial — Bloques 1 al 4",
+    objective: "Comprobar la adquisición de los conceptos fundamentales del primer bloque.",
+    type: "exam",
+    sources: []
+  },
+  {
+    id: 6, title: "Proyecto integrador — programa completo",
+    objective: "Diseñar y entregar un programa Python de complejidad media que integre los conceptos del curso.",
+    type: "exercise",
+    sources: ["Material propio: rúbrica_proyecto.pdf"]
+  },
+  {
+    id: 7, title: "Evaluación final",
+    objective: "Evaluación sumativa individual. Supervisada por el docente.",
+    type: "exam",
+    sources: []
+  }
+];
+
+let modules = JSON.parse(JSON.stringify(MODULES_INIT));
+let currentScreen = 1;
+
+/* ═══════════════════════════════════════════════
+   IndexedDB (persistence)
+═══════════════════════════════════════════════ */
+let db;
+function openDB() {
+  const req = indexedDB.open("ai2learn_proto_docente", 1);
+  req.onupgradeneeded = e => {
+    const d = e.target.result;
+    if (!d.objectStoreNames.contains("state")) {
+      d.createObjectStore("state", { keyPath: "key" });
+    }
+  };
+  req.onsuccess = e => {
+    db = e.target.result;
+    loadState();
+  };
+}
+function saveState() {
+  if (!db) return;
+  const tx = db.transaction("state", "readwrite");
+  const st = tx.objectStore("state");
+  st.put({ key: "modules", value: modules });
+  st.put({ key: "screen", value: currentScreen });
+}
+function loadState() {
+  if (!db) return;
+  const tx = db.transaction("state", "readonly");
+  const st = tx.objectStore("state");
+  st.get("modules").onsuccess = e => { if (e.target.result) modules = e.target.result.value; renderModules(); };
+}
+
+/* ═══════════════════════════════════════════════
+   Navigation
+═══════════════════════════════════════════════ */
+function goToScreen(n) {
+  document.getElementById(`screen-${currentScreen}`).classList.remove("active");
+  currentScreen = n;
+  document.getElementById(`screen-${n}`).classList.add("active");
+
+  // Update step bar
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById(`step${i}`);
+    el.classList.remove("active", "done");
+    if (i < n) el.classList.add("done");
+    if (i === n) el.classList.add("active");
+  }
+
+  if (n === 2 && document.getElementById("chatContainer").children.length === 0) {
+    initChat();
+  }
+  if (n === 3) {
+    renderModules();
+  }
+  if (n === 4) {
+    const name = document.getElementById("subjectName").value || "Fundamentos de Programación";
+    document.getElementById("dashSubjectName").textContent = name;
+  }
+
+  saveState();
+  window.scrollTo(0, 0);
+}
+
+function resetAndGoTo(n) {
+  modules = JSON.parse(JSON.stringify(MODULES_INIT));
+  document.getElementById("chatContainer").innerHTML = "";
+  goToScreen(n);
+}
+
+/* ═══════════════════════════════════════════════
+   File upload (simulated)
+═══════════════════════════════════════════════ */
+function addFiles(files) {
+  const list = document.getElementById("fileList");
+  Array.from(files).forEach(f => {
+    const chip = document.createElement("div");
+    chip.className = "file-chip";
+    chip.innerHTML = `<span>📄 ${f.name}</span><button class="remove" onclick="this.parentElement.remove()">✕</button>`;
+    list.appendChild(chip);
+  });
+}
+
+const uploadZone = document.getElementById("uploadZone");
+uploadZone.addEventListener("dragover", e => { e.preventDefault(); uploadZone.classList.add("drag-over"); });
+uploadZone.addEventListener("dragleave", () => uploadZone.classList.remove("drag-over"));
+uploadZone.addEventListener("drop", e => {
+  e.preventDefault();
+  uploadZone.classList.remove("drag-over");
+  addFiles(e.dataTransfer.files);
+});
+
+/* ═══════════════════════════════════════════════
+   Chat (agente — respuestas simuladas)
+═══════════════════════════════════════════════ */
+const AGENT_INIT = `He analizado tu guía docente y los archivos que has aportado. He identificado **7 módulos** distribuidos en 14 semanas, con una progresión desde pensamiento computacional hasta un proyecto integrador final.
+
+En cada módulo he incluido referencias al material original o fuentes abiertas reconocidas (CS50x, Python Docs). La evaluación sumativa queda siempre bajo tu control.
+
+¿Te parece bien esta estructura o quieres ajustar algo? Puedes pedirme cambios en lenguaje natural.`;
+
+const RESPONSES = [
+  { trigger: ["tono", "módulo 2", "diferente", "lenguaje"], reply: "Hecho. He reescrito el objetivo del Módulo 2 con un enfoque más práctico y menos formal. Ahora arranca con un ejemplo concreto antes de introducir el concepto." },
+  { trigger: ["ejercicio", "práctico", "al final", "añade"], reply: "Perfecto. He añadido un ejercicio práctico al final del último módulo de contenido. Incluye un enunciado abierto y rúbrica de evaluación básica." },
+  { trigger: ["fusiona", "fusionar", "combina", "combinar", "une", "unir"], reply: "Entendido. He fusionado los módulos indicados en uno solo, manteniendo ambos conjuntos de objetivos. El módulo resultante queda marcado como 'lesson + exercise'." },
+  { trigger: ["split", "divide", "partir", "separa", "separar"], reply: "He dividido el módulo en dos partes diferenciadas. La primera cubre la base teórica y la segunda los ejercicios de aplicación." },
+  { trigger: ["semana", "semanas", "dura", "duración"], reply: "La asignatura está distribuida en 14 semanas. Los módulos de evaluación (parcial y final) ocupan semanas fijas; el resto es flexible. ¿Quieres que ajuste alguna semana concreta?" },
+  { trigger: ["fuente", "referencias", "bibliografía", "origen"], reply: "Cada módulo incluye referencias al material que has aportado o, donde he completado con fuentes abiertas, el enlace exacto. Puedes verlas en la tarjeta de cada módulo en la pantalla siguiente." },
+  { trigger: ["elimina", "quita", "borra", "suprime"], reply: "He eliminado el módulo indicado. ¿Quieres redistribuir su contenido entre los módulos adyacentes o dejarlo fuera?" },
+];
+
+function agentReply(msg) {
+  const low = msg.toLowerCase();
+  for (const r of RESPONSES) {
+    if (r.trigger.some(t => low.includes(t))) return r.reply;
+  }
+  return "Entendido. He actualizado la estructura según tu instrucción. ¿Algún otro ajuste antes de pasar a la revisión?";
+}
+
+function initChat() {
+  addBubble("agent", AGENT_INIT);
+}
+
+function addBubble(role, text) {
+  const container = document.getElementById("chatContainer");
+  const bubble = document.createElement("div");
+  bubble.className = `bubble ${role}`;
+  const label = role === "agent" ? "Agente instructional designer" : "Tú";
+  bubble.innerHTML = `<div class="bubble-label">${label}</div><div class="bubble-body">${markdownLite(text)}</div>`;
+  container.appendChild(bubble);
+  container.scrollTop = container.scrollHeight;
+}
+
+function addTyping() {
+  const container = document.getElementById("chatContainer");
+  const el = document.createElement("div");
+  el.className = "bubble agent";
+  el.id = "typingBubble";
+  el.innerHTML = `<div class="bubble-label">Agente instructional designer</div><div class="bubble-body"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  container.appendChild(el);
+  container.scrollTop = container.scrollHeight;
+  return el;
+}
+
+function sendMessage() {
+  const input = document.getElementById("chatInput");
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = "";
+  addBubble("user", msg);
+
+  const btn = document.getElementById("sendBtn");
+  btn.disabled = true;
+  const typing = addTyping();
+
+  setTimeout(() => {
+    typing.remove();
+    addBubble("agent", agentReply(msg));
+    btn.disabled = false;
+  }, 1200 + Math.random() * 800);
+}
+
+document.addEventListener("keydown", e => {
+  if (e.key === "Enter" && e.ctrlKey && currentScreen === 2) { sendMessage(); }
+});
+
+/* ═══════════════════════════════════════════════
+   Module list
+═══════════════════════════════════════════════ */
+const TYPE_LABELS = { lesson: "Lección", exercise: "Ejercicio", exam: "Examen" };
+const TYPE_TAGS   = { lesson: "tag-lesson", exercise: "tag-exercise", exam: "tag-exam" };
+const TYPE_ICONS  = { lesson: "📖", exercise: "✏️", exam: "📝" };
+
+function renderModules() {
+  const list = document.getElementById("moduleList");
+  list.innerHTML = "";
+  modules.forEach((m, i) => {
+    const el = document.createElement("div");
+    el.className = "module-item";
+    el.dataset.id = m.id;
+    el.innerHTML = `
+      <div class="module-header">
+        <div class="module-drag">⠿</div>
+        <div class="module-title-row">
+          <div class="module-number">Módulo ${i + 1}</div>
+          <div class="module-title">${m.title}</div>
+          <div class="module-obj">${m.objective}</div>
+        </div>
+        <div class="module-actions">
+          <button class="btn btn-muted btn-sm btn-icon" title="Editar" onclick="toggleEdit(${m.id})">✏️</button>
+          <button class="btn btn-muted btn-sm btn-icon" title="Eliminar" onclick="removeModule(${m.id})">🗑</button>
+        </div>
+      </div>
+      <div class="module-footer">
+        <span class="tag ${TYPE_TAGS[m.type]}">${TYPE_ICONS[m.type]} ${TYPE_LABELS[m.type]}</span>
+        ${m.sources.map(s => `<span class="tag tag-source">📎 ${s}</span>`).join("")}
+      </div>
+      <div class="module-edit-form" id="edit-${m.id}" style="display:none">
+        <div class="label" style="margin-top:8px">Título</div>
+        <input type="text" value="${m.title}" id="et-${m.id}">
+        <div class="label">Objetivo de aprendizaje</div>
+        <textarea rows="2" id="eo-${m.id}">${m.objective}</textarea>
+        <div class="row">
+          <select style="border:1.5px solid var(--border);border-radius:8px;padding:8px 12px;font-size:14px;flex:1" id="ety-${m.id}">
+            <option value="lesson" ${m.type==="lesson"?"selected":""}>Lección</option>
+            <option value="exercise" ${m.type==="exercise"?"selected":""}>Ejercicio</option>
+            <option value="exam" ${m.type==="exam"?"selected":""}>Examen</option>
+          </select>
+          <button class="btn btn-primary btn-sm" onclick="saveEdit(${m.id})">Guardar</button>
+          <button class="btn btn-muted btn-sm" onclick="toggleEdit(${m.id})">Cancelar</button>
+        </div>
+      </div>
+    `;
+    list.appendChild(el);
+  });
+}
+
+function toggleEdit(id) {
+  const form = document.getElementById(`edit-${id}`);
+  const item = form.closest(".module-item");
+  const showing = form.style.display !== "none";
+  form.style.display = showing ? "none" : "block";
+  item.classList.toggle("editing", !showing);
+}
+
+function saveEdit(id) {
+  const m = modules.find(x => x.id === id);
+  m.title     = document.getElementById(`et-${id}`).value;
+  m.objective = document.getElementById(`eo-${id}`).value;
+  m.type      = document.getElementById(`ety-${id}`).value;
+  saveState();
+  renderModules();
+}
+
+function removeModule(id) {
+  modules = modules.filter(m => m.id !== id);
+  saveState();
+  renderModules();
+}
+
+function addModule() {
+  const maxId = modules.reduce((a, m) => Math.max(a, m.id), 0);
+  modules.push({
+    id: maxId + 1,
+    title: "Nuevo módulo",
+    objective: "Describe aquí el objetivo de aprendizaje.",
+    type: "lesson",
+    sources: []
+  });
+  saveState();
+  renderModules();
+  // open edit on new module
+  setTimeout(() => toggleEdit(maxId + 1), 50);
+}
+
+function publishCourse() {
+  showToast("✅ Asignatura publicada — abriendo dashboard");
+  setTimeout(() => goToScreen(4), 1000);
+}
+
+/* ═══════════════════════════════════════════════
+   Dashboard actions
+═══════════════════════════════════════════════ */
+function acceptSuggestion(btn, type) {
+  const card = btn.closest(".alert-card");
+  const actions = card.querySelector(".alert-actions");
+  if (type === "refuerzo") {
+    actions.innerHTML = `<span style="color:var(--ok);font-size:13px;font-weight:600">✅ Material de refuerzo generado y añadido al Módulo 2 como recurso opcional</span>`;
+  } else {
+    actions.innerHTML = `<span style="color:var(--ok);font-size:13px;font-weight:600">✅ Mini-quiz añadido antes del examen del Módulo 3</span>`;
+  }
+}
+
+function dismissAlert(btn) {
+  btn.closest(".alert-card").style.display = "none";
+}
+
+function showStudentDetail() {
+  const body = document.getElementById("studentTable");
+  body.classList.add("open");
+  const btn = document.querySelector(".collapsible-btn");
+  btn.querySelector(".toggle-icon").textContent = "▼";
+  body.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function reviewExercises() {
+  showToast("Abriendo vista de ejercicios del Módulo 3...");
+}
+
+function toggleCollapsible(btn) {
+  const body = btn.nextElementSibling;
+  const open = body.classList.toggle("open");
+  btn.querySelector(".toggle-icon").textContent = open ? "▼" : "▶";
+}
+
+/* ═══════════════════════════════════════════════
+   Utilities
+═══════════════════════════════════════════════ */
+function markdownLite(text) {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\n/g, "<br>");
+}
+
+let toastTimer;
+function showToast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 2800);
+}
+
+/* ═══════════════════════════════════════════════
+   Init
+═══════════════════════════════════════════════ */
+openDB();
+goToScreen(1);
+</script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 # Construir prototipo del docente
 
 Type: task
-Status: open
+Status: resolved
 Blocked by: 01
 
 ## Question
