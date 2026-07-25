@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<!-- PROTOTIPO DESECHABLE — no promover a producción -->
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI2Learn — Prototipos</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:       #f5f4f1;
+  --surface:  #ffffff;
+  --border:   #e2e0db;
+  --primary:  #2563eb;
+  --teal:     #0d9488;
+  --accent:   #7c3aed;
+  --muted:    #6b7280;
+  --text:     #111827;
+  --radius:   12px;
+  --shadow:   0 2px 8px rgba(0,0,0,.09);
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 32px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.logo { font-weight: 800; font-size: 20px; color: var(--primary); letter-spacing: -.5px; }
+.header-badge {
+  background: #fee2e2; color: #991b1b;
+  font-size: 11px; font-weight: 700;
+  padding: 3px 10px; border-radius: 20px;
+}
+
+/* Hero */
+.hero {
+  text-align: center;
+  padding: 64px 24px 48px;
+  max-width: 680px;
+  margin: 0 auto;
+}
+.hero h1 {
+  font-size: 34px; font-weight: 800; line-height: 1.2;
+  margin-bottom: 16px;
+}
+.hero h1 span { color: var(--primary); }
+.hero p {
+  font-size: 16px; line-height: 1.7; color: var(--muted);
+  margin-bottom: 8px;
+}
+.hero .context {
+  font-size: 13px; color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 16px;
+  margin-top: 20px;
+  text-align: left;
+  line-height: 1.6;
+}
+.hero .context strong { color: var(--text); }
+
+/* Question banner */
+.question-banner {
+  max-width: 680px; margin: 0 auto 48px;
+  background: #eff6ff;
+  border: 1.5px solid #bfdbfe;
+  border-radius: var(--radius);
+  padding: 18px 24px;
+}
+.question-banner .q-label {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .6px; color: var(--primary); margin-bottom: 6px;
+}
+.question-banner p { font-size: 14px; color: var(--text); line-height: 1.6; }
+
+/* Cards grid */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+}
+
+.proto-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow .2s, transform .2s;
+}
+.proto-card:hover {
+  box-shadow: 0 6px 24px rgba(0,0,0,.13);
+  transform: translateY(-2px);
+}
+
+.card-stripe {
+  height: 6px;
+}
+.card-stripe.docente  { background: var(--primary); }
+.card-stripe.estudiante { background: var(--teal); }
+
+.card-body { padding: 24px 24px 20px; flex: 1; }
+
+.card-role {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .7px; margin-bottom: 8px;
+}
+.card-role.docente    { color: var(--primary); }
+.card-role.estudiante { color: var(--teal); }
+
+.card-icon { font-size: 40px; margin-bottom: 12px; display: block; }
+
+.card-body h2 { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+.card-body .question {
+  font-size: 14px; font-style: italic; color: var(--muted);
+  border-left: 3px solid var(--border);
+  padding-left: 12px; margin-bottom: 16px;
+  line-height: 1.6;
+}
+
+.flow-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.flow-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 13px; color: var(--text); line-height: 1.5;
+}
+.flow-num {
+  width: 22px; height: 22px; border-radius: 50%;
+  font-size: 11px; font-weight: 700; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  margin-top: 1px;
+}
+.docente  .flow-num { background: #eff6ff; color: var(--primary); }
+.estudiante .flow-num { background: var(--teal-bg, #f0fdfa); color: var(--teal); }
+
+.aha-box {
+  margin-top: 16px;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px; line-height: 1.5;
+}
+.docente    .aha-box { background: #eff6ff; border: 1px solid #bfdbfe; }
+.estudiante .aha-box { background: #f0fdfa; border: 1px solid #99f6e4; }
+.aha-label {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .5px; margin-bottom: 4px;
+}
+.docente    .aha-label { color: var(--primary); }
+.estudiante .aha-label { color: var(--teal); }
+
+.card-footer {
+  padding: 16px 24px 24px;
+  border-top: 1px solid var(--border);
+}
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  width: 100%; justify-content: center;
+  padding: 12px 20px; border-radius: 9px;
+  font-size: 15px; font-weight: 700;
+  cursor: pointer; border: none; text-decoration: none;
+  transition: opacity .15s, transform .15s;
+}
+.btn:hover { opacity: .9; transform: scale(1.01); }
+.btn-docente    { background: var(--primary); color: #fff; }
+.btn-estudiante { background: var(--teal); color: #fff; }
+
+/* Divider */
+.how {
+  max-width: 680px; margin: 0 auto 48px;
+  padding: 0 24px;
+}
+.how h2 { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+.how-steps {
+  display: flex; flex-direction: column; gap: 10px;
+}
+.how-step {
+  display: flex; align-items: flex-start; gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 13px; line-height: 1.5;
+}
+.how-step-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+
+/* Footer */
+footer {
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  padding: 14px 32px;
+  font-size: 12px; color: var(--muted);
+  display: flex; align-items: center; justify-content: space-between;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">AI2Learn</div>
+  <div class="header-badge">PROTOTIPOS DESECHABLES</div>
+</header>
+
+<div class="hero">
+  <h1>Un LMS pensado<br><span>desde la IA</span></h1>
+  <p>Dos prototipos navegables para validar con personas reales si la propuesta de valor tiene sentido — antes de construir nada en producción.</p>
+  <div class="context">
+    <strong>Contexto:</strong> estos prototipos son HTML estático sin dependencias externas. Usan IndexedDB para persistir el estado entre recargas. Las respuestas del agente son simuladas para centrar la evaluación en el flujo y la propuesta de valor, no en la IA real.
+  </div>
+</div>
+
+<div class="question-banner">
+  <div class="q-label">Pregunta que responden estos prototipos</div>
+  <p>
+    <strong>Docente:</strong> ¿siento que gano control sobre mi asignatura y libero tiempo gracias al agente?<br>
+    <strong>Estudiante:</strong> ¿veo que el sistema me aporta valor real frente a un LMS tradicional?
+  </p>
+</div>
+
+<div class="cards">
+
+  <!-- ── DOCENTE ── -->
+  <div class="proto-card docente">
+    <div class="card-stripe docente"></div>
+    <div class="card-body">
+      <div class="card-role docente">Prototipo 1 — Docente</div>
+      <span class="card-icon">🧑‍🏫</span>
+      <h2>Agente instructional designer + dashboard</h2>
+      <div class="question">
+        "El agente me ahorra horas de diseño pero sigo controlando qué se crea. Sé exactamente dónde están mis estudiantes sin corregir nada."
+      </div>
+      <ul class="flow-list">
+        <li class="flow-item">
+          <div class="flow-num">1</div>
+          <span>Aportas material (PDF, guía docente, URLs) como punto de entrada único</span>
+        </li>
+        <li class="flow-item">
+          <div class="flow-num">2</div>
+          <span>Conversación iterativa con el agente: refinas la propuesta con lenguaje natural</span>
+        </li>
+        <li class="flow-item">
+          <div class="flow-num">3</div>
+          <span>Revisas y editas los módulos — con referencias al material original siempre visibles</span>
+        </li>
+        <li class="flow-item">
+          <div class="flow-num">4</div>
+          <span>Dashboard activo: alertas accionables, sugerencias del agente, estado de la clase</span>
+        </li>
+      </ul>
+      <div class="aha-box">
+        <div class="aha-label">Aha moments</div>
+        Creación de asignatura: "el agente me propone la estructura, yo decido qué queda" · Dashboard: "sé qué hacer sin haber corregido nada"
+      </div>
+    </div>
+    <div class="card-footer">
+      <a class="btn btn-docente" href="docente/index.html">Abrir prototipo del docente →</a>
+    </div>
+  </div>
+
+  <!-- ── ESTUDIANTE ── -->
+  <div class="proto-card estudiante">
+    <div class="card-stripe estudiante"></div>
+    <div class="card-body">
+      <div class="card-role estudiante">Prototipo 2 — Estudiante</div>
+      <span class="card-icon">🎓</span>
+      <h2>Camino estándar con callejones personalizados</h2>
+      <div class="question">
+        "El sistema no me dice que he fallado — me ayuda a entender por qué. Y tengo un mapa propio de lo que he explorado."
+      </div>
+      <ul class="flow-list">
+        <li class="flow-item">
+          <div class="flow-num">1</div>
+          <span>Camino estándar como autopista, con rating anónimo de otros estudiantes</span>
+        </li>
+        <li class="flow-item">
+          <div class="flow-num">2</div>
+          <span>Mini-quiz con retroalimentación inmediata por pregunta</span>
+        </li>
+        <li class="flow-item">
+          <div class="flow-num">3</div>
+          <span>El agente propone un callejón personalizado según resultado — invitación, no imposición</span>
+        </li>
+        <li class="flow-item">
+          <div class="flow-num">4</div>
+          <span>Conversación con el agente tutor + ejercicio práctico en el callejón de refuerzo</span>
+        </li>
+      </ul>
+      <div class="aha-box" style="background:#f0fdfa;border-color:#99f6e4">
+        <div class="aha-label" style="color:var(--teal)">Aha moment</div>
+        Callejón de refuerzo completo: fallas → el agente te explica desde otro ángulo → resuelves un ejercicio → vuelves al camino. Además: mapa personal de exploración acumulado.
+      </div>
+      <div style="margin-top:12px;font-size:12px;color:var(--muted)">
+        💡 Usa el selector de perfil (Ana / Carlos) para ver callejones diferentes según el resultado del quiz.
+      </div>
+    </div>
+    <div class="card-footer">
+      <a class="btn btn-estudiante" href="estudiante/index.html">Abrir prototipo del estudiante →</a>
+    </div>
+  </div>
+
+</div>
+
+<!-- Cómo usarlos -->
+<div class="how">
+  <h2>Cómo usarlos en una sesión de validación</h2>
+  <div class="how-steps">
+    <div class="how-step">
+      <div class="how-step-icon">🎯</div>
+      <div><strong>Fija la pregunta antes de empezar.</strong> Para el docente: "¿sientes que el agente te libera tiempo o te añade trabajo?". Para el estudiante: "¿entiendes mejor por qué has fallado que con un LMS normal?"</div>
+    </div>
+    <div class="how-step">
+      <div class="how-step-icon">🤫</div>
+      <div><strong>No expliques nada antes de que lo naveguen.</strong> Observa dónde se detienen, qué leen, qué ignoran. Los silencios son datos.</div>
+    </div>
+    <div class="how-step">
+      <div class="how-step-icon">📝</div>
+      <div><strong>Recoge reacciones en voz alta.</strong> Pide que piensen en voz alta mientras navegan. Anota las frases exactas, no tu interpretación.</div>
+    </div>
+    <div class="how-step">
+      <div class="how-step-icon">🔄</div>
+      <div><strong>Cambia el perfil del estudiante</strong> (Ana / Carlos) para mostrar que los callejones son personalizados, no el mismo contenido para todos.</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span>AI2Learn · Prototipos de validación · HTML estático + IndexedDB</span>
+  <span>PROTOTIPO DESECHABLE — no promover a producción</span>
+</footer>
+
+</body>
+</html>

@@ -1,7 +1,7 @@
 # Construir prototipo del estudiante
 
 Type: task
-Status: open
+Status: resolved
 Blocked by: 02
 
 ## Question

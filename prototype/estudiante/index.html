@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<!-- PROTOTIPO DESECHABLE — no promover a producción -->
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI2Learn — Prototipo Estudiante</title>
+<style>
+/* ──────────────────────────────────────────
+   Tokens & reset
+────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:        #f5f4f1;
+  --surface:   #ffffff;
+  --border:    #e2e0db;
+  --primary:   #2563eb;
+  --primary-h: #1d4ed8;
+  --accent:    #7c3aed;
+  --accent-bg: #faf5ff;
+  --teal:      #0d9488;
+  --teal-bg:   #f0fdfa;
+  --warn:      #d97706;
+  --warn-bg:   #fffbeb;
+  --ok:        #16a34a;
+  --ok-bg:     #f0fdf4;
+  --err:       #dc2626;
+  --err-bg:    #fef2f2;
+  --muted:     #6b7280;
+  --text:      #111827;
+  --radius:    10px;
+  --shadow:    0 1px 4px rgba(0,0,0,.08);
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ──────────────────────────────────────────
+   Shell
+────────────────────────────────────────── */
+header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: sticky; top: 0; z-index: 50;
+}
+.logo { font-weight: 700; font-size: 18px; color: var(--primary); letter-spacing: -.5px; flex-shrink: 0; }
+.header-badge {
+  background: #fee2e2; color: #991b1b;
+  font-size: 11px; font-weight: 600;
+  padding: 2px 8px; border-radius: 20px;
+}
+.header-course {
+  font-size: 13px; color: var(--muted);
+  border-left: 1px solid var(--border);
+  padding-left: 16px; flex: 1;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.header-user {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 14px; color: var(--muted); flex-shrink: 0;
+}
+.avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--teal); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 13px;
+}
+
+main {
+  max-width: 860px; margin: 0 auto;
+  padding: 28px 24px 80px;
+}
+
+/* ──────────────────────────────────────────
+   Screens
+────────────────────────────────────────── */
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* ──────────────────────────────────────────
+   Typography
+────────────────────────────────────────── */
+h1 { font-size: 21px; font-weight: 700; }
+h2 { font-size: 16px; font-weight: 700; margin-bottom: 10px; }
+h3 { font-size: 14px; font-weight: 600; }
+p  { font-size: 14px; line-height: 1.65; color: var(--muted); }
+.label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin-bottom: 6px; }
+
+/* ──────────────────────────────────────────
+   Card
+────────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px 22px;
+}
+.card + .card { margin-top: 12px; }
+
+/* ──────────────────────────────────────────
+   Buttons
+────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 18px; border-radius: 8px;
+  font-size: 14px; font-weight: 600;
+  cursor: pointer; border: none;
+  transition: background .14s, opacity .14s;
+  text-decoration: none;
+}
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.btn-primary   { background: var(--primary); color: #fff; }
+.btn-primary:hover:not(:disabled) { background: var(--primary-h); }
+.btn-accent    { background: var(--accent); color: #fff; }
+.btn-accent:hover:not(:disabled)  { background: #6d28d9; }
+.btn-teal      { background: var(--teal); color: #fff; }
+.btn-teal:hover:not(:disabled)    { background: #0f766e; }
+.btn-ghost {
+  background: transparent; color: var(--primary);
+  border: 1.5px solid var(--primary);
+}
+.btn-ghost:hover:not(:disabled) { background: #eff6ff; }
+.btn-muted {
+  background: #f3f4f6; color: var(--text);
+  border: 1.5px solid var(--border);
+}
+.btn-muted:hover:not(:disabled) { background: #e5e7eb; }
+.btn-sm  { padding: 6px 14px; font-size: 13px; }
+.btn-xs  { padding: 4px 10px; font-size: 12px; }
+
+/* ──────────────────────────────────────────
+   Progress bar (global)
+────────────────────────────────────────── */
+.global-progress {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 24px;
+  display: flex; align-items: center; gap: 14px;
+  font-size: 13px; color: var(--muted);
+}
+.gp-bar-wrap { flex: 1; background: var(--border); border-radius: 4px; height: 6px; }
+.gp-bar-fill { height: 6px; border-radius: 4px; background: var(--primary); transition: width .4s; }
+
+/* ──────────────────────────────────────────
+   Road (camino estándar)
+────────────────────────────────────────── */
+.road {
+  display: flex; flex-direction: column; gap: 0;
+  position: relative;
+}
+/* vertical connector */
+.road::before {
+  content: "";
+  position: absolute; left: 19px; top: 24px; bottom: 24px;
+  width: 2px; background: var(--border);
+  z-index: 0;
+}
+
+.road-item {
+  display: flex; gap: 16px; align-items: flex-start;
+  padding: 10px 0;
+  position: relative; z-index: 1;
+}
+
+.road-node {
+  width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+  border: 2px solid var(--border);
+  background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  box-shadow: var(--shadow);
+  transition: border-color .2s, background .2s;
+}
+.road-node.done     { background: var(--ok); border-color: var(--ok); }
+.road-node.active   { border-color: var(--primary); box-shadow: 0 0 0 3px #bfdbfe; }
+.road-node.locked   { opacity: .4; }
+.road-node.detour-available { border-color: var(--accent); box-shadow: 0 0 0 3px #ddd6fe; }
+
+.road-content { flex: 1; padding-top: 8px; }
+.road-title {
+  font-size: 15px; font-weight: 600;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.road-sub { font-size: 13px; color: var(--muted); margin-top: 3px; }
+
+/* Rating stars */
+.stars { display: inline-flex; gap: 1px; }
+.star  { font-size: 13px; }
+.star.full { color: #f59e0b; }
+.star.half { color: #f59e0b; opacity: .6; }
+.star.empty { color: #d1d5db; }
+.rating-label { font-size: 11px; color: var(--muted); }
+
+/* Detour badge */
+.detour-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--accent-bg); color: var(--accent);
+  border: 1px solid #ddd6fe;
+  border-radius: 20px; font-size: 12px; font-weight: 600;
+  padding: 3px 10px; cursor: pointer;
+  transition: background .14s;
+}
+.detour-badge:hover { background: #ede9fe; }
+.detour-badge.teal { background: var(--teal-bg); color: var(--teal); border-color: #99f6e4; }
+.detour-badge.teal:hover { background: #ccfbf1; }
+
+.road-actions { margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ──────────────────────────────────────────
+   Quiz
+────────────────────────────────────────── */
+.quiz-option {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 12px 14px; border-radius: 8px;
+  border: 1.5px solid var(--border);
+  margin-bottom: 8px; cursor: pointer;
+  font-size: 14px;
+  transition: border-color .14s, background .14s;
+  background: var(--surface);
+}
+.quiz-option:hover { border-color: var(--primary); background: #eff6ff; }
+.quiz-option.selected { border-color: var(--primary); background: #eff6ff; }
+.quiz-option.correct  { border-color: var(--ok); background: var(--ok-bg); }
+.quiz-option.wrong    { border-color: var(--err); background: var(--err-bg); }
+.quiz-option.reveal-correct { border-color: var(--ok); background: var(--ok-bg); }
+.opt-letter {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--border); color: var(--muted);
+  font-weight: 700; font-size: 12px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.quiz-option.correct  .opt-letter { background: var(--ok); color: #fff; }
+.quiz-option.wrong    .opt-letter { background: var(--err); color: #fff; }
+.quiz-option.reveal-correct .opt-letter { background: var(--ok); color: #fff; }
+
+.quiz-feedback {
+  border-radius: 8px; padding: 12px 16px; font-size: 14px; margin-top: 8px;
+  display: none;
+}
+.quiz-feedback.show { display: block; }
+.quiz-feedback.ok  { background: var(--ok-bg); color: #15803d; }
+.quiz-feedback.err { background: var(--err-bg); color: #b91c1c; }
+
+/* ──────────────────────────────────────────
+   Detour callout
+────────────────────────────────────────── */
+.detour-callout {
+  border: 2px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+  background: var(--accent-bg);
+  margin-top: 16px;
+}
+.detour-callout .dc-header {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+}
+.detour-callout .dc-icon { font-size: 28px; }
+.detour-callout .dc-title { font-size: 16px; font-weight: 700; color: var(--accent); }
+.detour-callout .dc-sub { font-size: 13px; color: var(--muted); }
+.detour-callout .dc-actions { display: flex; gap: 8px; margin-top: 14px; }
+
+/* ──────────────────────────────────────────
+   Chat (agente tutor)
+────────────────────────────────────────── */
+.chat-wrap {
+  display: flex; flex-direction: column; gap: 12px;
+  max-height: 380px; overflow-y: auto; padding: 4px 0;
+}
+.bubble { display: flex; flex-direction: column; gap: 2px; max-width: 82%; }
+.bubble.agent { align-self: flex-start; }
+.bubble.user  { align-self: flex-end; }
+.bubble-label { font-size: 11px; color: var(--muted); padding: 0 4px; }
+.bubble-body  {
+  padding: 10px 14px; border-radius: 12px;
+  font-size: 14px; line-height: 1.65;
+}
+.agent .bubble-body { background: #f3f4f6; border-bottom-left-radius: 4px; }
+.user  .bubble-body { background: var(--accent); color: #fff; border-bottom-right-radius: 4px; }
+
+.chat-input-row { display: flex; gap: 8px; margin-top: 12px; }
+.chat-input-row textarea {
+  flex: 1; min-height: 44px; resize: none;
+  border: 1.5px solid var(--border); border-radius: 8px;
+  padding: 10px 12px; font-size: 14px; font-family: inherit; outline: none;
+  transition: border .14s;
+}
+.chat-input-row textarea:focus { border-color: var(--accent); }
+
+.typing { display: flex; gap: 4px; align-items: center; padding: 2px 0; }
+.typing span {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--muted); animation: bounce .9s infinite;
+}
+.typing span:nth-child(2) { animation-delay: .15s; }
+.typing span:nth-child(3) { animation-delay: .3s; }
+@keyframes bounce {
+  0%,80%,100% { transform: translateY(0); }
+  40%          { transform: translateY(-6px); }
+}
+
+/* ──────────────────────────────────────────
+   Exercise
+────────────────────────────────────────── */
+.code-area {
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 13px; line-height: 1.7;
+  background: #1e1e2e; color: #cdd6f4;
+  border-radius: 8px; padding: 16px;
+  width: 100%; min-height: 120px; resize: vertical;
+  border: none; outline: none;
+  transition: box-shadow .14s;
+}
+.code-area:focus { box-shadow: 0 0 0 2px var(--accent); }
+.code-result {
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 13px; border-radius: 8px; padding: 12px 14px;
+  margin-top: 8px; display: none;
+}
+.code-result.ok  { background: var(--ok-bg); color: #15803d; display: block; }
+.code-result.err { background: var(--err-bg); color: #b91c1c; display: block; }
+
+/* ──────────────────────────────────────────
+   Map (mapa de exploración)
+────────────────────────────────────────── */
+.map-container {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  min-height: 340px;
+  padding: 24px;
+}
+.map-lane {
+  display: flex; align-items: center; gap: 0;
+  position: relative; margin-bottom: 32px;
+}
+.map-lane:last-child { margin-bottom: 0; }
+.map-lane-label {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  color: var(--muted); width: 120px; flex-shrink: 0;
+}
+.map-nodes { display: flex; align-items: center; gap: 0; flex: 1; }
+.map-node {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 2px solid var(--border); background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0; position: relative;
+  transition: transform .2s;
+}
+.map-node:hover { transform: scale(1.15); }
+.map-node.done  { background: var(--ok); border-color: var(--ok); }
+.map-node.active { background: var(--primary); border-color: var(--primary); box-shadow: 0 0 0 3px #bfdbfe; }
+.map-node.detour { background: var(--accent-bg); border-color: var(--accent); }
+.map-node.detour-done { background: var(--accent); border-color: var(--accent); }
+.map-node-tip {
+  position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+  background: #1f2937; color: #fff; font-size: 11px; white-space: nowrap;
+  padding: 4px 8px; border-radius: 6px; display: none; z-index: 10;
+  pointer-events: none;
+}
+.map-node:hover .map-node-tip { display: block; }
+.map-connector { height: 2px; flex: 1; background: var(--border); }
+.map-connector.done { background: var(--ok); }
+.map-connector.detour-line { background: var(--accent); height: 2px; width: 20px; flex: none; }
+
+.map-legend { display: flex; gap: 16px; margin-top: 16px; flex-wrap: wrap; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+.legend-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid transparent; }
+
+/* ──────────────────────────────────────────
+   Misc helpers
+────────────────────────────────────────── */
+.flex { display: flex; }
+.items-center { align-items: center; }
+.gap-8  { gap: 8px; }
+.gap-12 { gap: 12px; }
+.mt-8   { margin-top: 8px; }
+.mt-12  { margin-top: 12px; }
+.mt-16  { margin-top: 16px; }
+.mt-20  { margin-top: 20px; }
+.mt-24  { margin-top: 24px; }
+.ml-auto { margin-left: auto; }
+.text-muted { color: var(--muted); font-size: 13px; }
+.divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+.section-title {
+  font-size: 18px; font-weight: 700; margin-bottom: 4px;
+  display: flex; align-items: center; gap: 10px;
+}
+
+/* Profile switcher (for demo) */
+.profile-bar {
+  background: #1f2937; color: #fff;
+  padding: 8px 24px; font-size: 12px;
+  display: flex; align-items: center; gap: 12px;
+}
+.profile-bar span { color: #9ca3af; }
+.profile-btn {
+  background: none; border: 1px solid #4b5563;
+  color: #d1d5db; padding: 3px 10px; border-radius: 6px;
+  font-size: 12px; cursor: pointer; transition: background .14s;
+}
+.profile-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+.profile-btn:hover:not(.active) { background: #374151; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: #1f2937; color: #fff;
+  padding: 10px 20px; border-radius: 8px; font-size: 13px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.3);
+  transition: transform .3s; z-index: 200;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* Proto badge */
+.proto-badge {
+  position: fixed; bottom: 20px; right: 20px;
+  background: #1f2937; color: #fff;
+  font-size: 11px; font-weight: 600;
+  padding: 6px 14px; border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.3);
+  z-index: 100; pointer-events: none;
+}
+
+/* Highlight box */
+.highlight-box {
+  background: linear-gradient(135deg, #eff6ff 0%, #faf5ff 100%);
+  border: 1px solid #ddd6fe;
+  border-radius: var(--radius);
+  padding: 16px 18px;
+}
+
+/* Return banner */
+.return-banner {
+  background: var(--ok-bg);
+  border: 1.5px solid #bbf7d0;
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  display: flex; align-items: center; gap: 12px;
+  font-size: 14px;
+}
+.return-banner .rb-icon { font-size: 24px; }
+.return-banner strong { color: var(--ok); }
+</style>
+</head>
+<body>
+
+<!-- Profile switcher (demo only) -->
+<div class="profile-bar">
+  <span>Perfil demo:</span>
+  <button class="profile-btn active" onclick="switchProfile('ana')" id="pbAna">Ana — domina rápido</button>
+  <button class="profile-btn" onclick="switchProfile('carlos')" id="pbCarlos">Carlos — necesita refuerzo</button>
+  <span style="margin-left:auto;color:#4b5563">Cambia el perfil para ver callejones diferentes</span>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">AI2Learn</div>
+  <div class="header-badge">PROTOTIPO</div>
+  <div class="header-course">Fundamentos de Programación — Módulo 2: Algoritmos básicos</div>
+  <div class="header-user">
+    <div class="avatar" id="userAvatar">AG</div>
+    <span id="userName">Ana García</span>
+  </div>
+</header>
+
+<!-- Progress bar -->
+<div class="global-progress">
+  <span id="gpLabel">Módulo 2 de 7</span>
+  <div class="gp-bar-wrap">
+    <div class="gp-bar-fill" id="gpFill" style="width:28%"></div>
+  </div>
+  <span id="gpPct">28%</span>
+</div>
+
+<!-- MAIN -->
+<main>
+
+  <!-- ═════════════════════════════════════════
+       SCREEN 1 — Camino estándar
+  ═════════════════════════════════════════ -->
+  <div class="screen active" id="screen-1">
+    <div class="section-title">
+      Tu camino
+      <button class="btn btn-muted btn-xs" onclick="goToMap()">🗺 Ver mi mapa</button>
+    </div>
+    <p style="margin-bottom:20px">Llevas 2 sesiones en este módulo. Continúa donde lo dejaste.</p>
+
+    <div class="road" id="road">
+
+      <!-- Bloque 1: done -->
+      <div class="road-item">
+        <div class="road-node done">✓</div>
+        <div class="road-content">
+          <div class="road-title">
+            Lección: ¿Qué es un algoritmo?
+            <div class="stars">
+              <span class="star full">★</span><span class="star full">★</span>
+              <span class="star full">★</span><span class="star full">★</span>
+              <span class="star half">★</span>
+            </div>
+            <span class="rating-label">4.4 — 312 estudiantes</span>
+          </div>
+          <div class="road-sub">Completado · 12 min</div>
+        </div>
+      </div>
+
+      <!-- Bloque 2: done + detour profundización (Ana) / nada (Carlos) -->
+      <div class="road-item">
+        <div class="road-node done">✓</div>
+        <div class="road-content">
+          <div class="road-title">
+            Vídeo: Condicionales paso a paso
+            <div class="stars">
+              <span class="star full">★</span><span class="star full">★</span>
+              <span class="star full">★</span><span class="star full">★</span>
+              <span class="star empty">★</span>
+            </div>
+            <span class="rating-label">4.1 — 298 estudiantes</span>
+          </div>
+          <div class="road-sub">Completado · 18 min</div>
+          <!-- detour profundización: solo Ana -->
+          <div class="road-actions" id="detourDeep" style="display:none">
+            <div class="detour-badge teal" onclick="goToDetourDeep()">
+              🔭 Callejón disponible — Profundización: condicionales anidados
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bloque 3: active — quiz -->
+      <div class="road-item">
+        <div class="road-node active">❓</div>
+        <div class="road-content">
+          <div class="road-title">Mini-quiz: Condicionales</div>
+          <div class="road-sub">Aquí estás ahora · 3 preguntas</div>
+          <div class="road-actions mt-8">
+            <button class="btn btn-primary btn-sm" onclick="goToScreen(2)">Hacer el quiz</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bloque 4: locked -->
+      <div class="road-item">
+        <div class="road-node locked">📖</div>
+        <div class="road-content" style="opacity:.5">
+          <div class="road-title">Ejercicios prácticos: 3 problemas</div>
+          <div class="road-sub">Bloqueado — completa el quiz primero</div>
+        </div>
+      </div>
+
+      <!-- Bloque 5: locked -->
+      <div class="road-item">
+        <div class="road-node locked">📝</div>
+        <div class="road-content" style="opacity:.5">
+          <div class="road-title">Examen del módulo 2</div>
+          <div class="road-sub">Bloqueado</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Módulos siguientes (colapsado) -->
+    <div class="mt-16 text-muted">↓ Módulo 3, 4, 5... se desbloquean a medida que avanzas</div>
+  </div>
+
+  <!-- ═════════════════════════════════════════
+       SCREEN 2 — Quiz (3 preguntas)
+  ═════════════════════════════════════════ -->
+  <div class="screen" id="screen-2">
+    <div class="section-title">Mini-quiz: Condicionales</div>
+    <p style="margin-bottom:20px">3 preguntas · elige la opción correcta · sin límite de tiempo</p>
+
+    <div class="card" id="quizCard">
+      <div class="label" id="qNum">Pregunta 1 de 3</div>
+      <h2 id="qText" style="margin-bottom:16px"></h2>
+      <div id="qOptions"></div>
+      <div class="quiz-feedback" id="qFeedback"></div>
+      <div class="flex mt-16 gap-8" style="justify-content:flex-end">
+        <button class="btn btn-primary" id="qNextBtn" style="display:none" onclick="nextQuestion()">Siguiente →</button>
+        <button class="btn btn-primary" id="qFinishBtn" style="display:none" onclick="finishQuiz()">Ver resultado →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═════════════════════════════════════════
+       SCREEN 3 — Resultado del quiz + desvío de refuerzo (Carlos)
+  ═════════════════════════════════════════ -->
+  <div class="screen" id="screen-3">
+    <div class="section-title" id="resultTitle">Resultado del quiz</div>
+
+    <div class="card" id="resultCard">
+      <div id="resultBody"></div>
+    </div>
+
+    <!-- Desvío refuerzo: Carlos -->
+    <div class="detour-callout" id="detourReinforceCallout" style="display:none">
+      <div class="dc-header">
+        <div class="dc-icon">🤖</div>
+        <div>
+          <div class="dc-title">El agente te sugiere un callejón de refuerzo</div>
+          <div class="dc-sub">No es obligatorio. Es un desvío de 10 min que te ayuda a entender qué ha fallado, no solo que has fallado.</div>
+        </div>
+      </div>
+      <p>He detectado que el bloque de condicionales anidados te genera dudas. Puedo explicártelo desde otro ángulo y darte un ejercicio concreto. Cuando lo termines, vuelves al camino estándar.</p>
+      <div class="dc-actions">
+        <button class="btn btn-accent" onclick="goToDetourReinforce()">Entrar al callejón — 10 min</button>
+        <button class="btn btn-muted" onclick="skipDetour()">Seguir sin el callejón</button>
+      </div>
+    </div>
+
+    <!-- Desvío profundización: Ana -->
+    <div class="detour-callout" id="detourDeepCallout" style="display:none; border-color:var(--teal); background:var(--teal-bg);">
+      <div class="dc-header">
+        <div class="dc-icon">🔭</div>
+        <div>
+          <div class="dc-title" style="color:var(--teal)">El agente te propone un callejón de profundización</div>
+          <div class="dc-sub">Dominas el tema. Este callejón va más allá del camino estándar.</div>
+        </div>
+      </div>
+      <p>Has respondido correctamente las 3 preguntas. Si quieres, puedo llevarte a un ejercicio más desafiante sobre condicionales anidados y casos límite.</p>
+      <div class="dc-actions">
+        <button class="btn btn-teal" onclick="goToDetourDeep()">Explorar el callejón</button>
+        <button class="btn btn-muted" onclick="skipDetour()">Continuar en el camino estándar</button>
+      </div>
+    </div>
+
+    <div class="flex mt-16 gap-8">
+      <button class="btn btn-muted btn-sm" onclick="goToScreen(1)">← Volver al camino</button>
+    </div>
+  </div>
+
+  <!-- ═════════════════════════════════════════
+       SCREEN 4 — Callejón de REFUERZO (chat + ejercicio)
+  ═════════════════════════════════════════ -->
+  <div class="screen" id="screen-4">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+      <div style="background:var(--accent);color:#fff;border-radius:6px;padding:3px 10px;font-size:12px;font-weight:700">CALLEJÓN DE REFUERZO</div>
+      <div class="section-title" style="margin:0">Condicionales — otro ángulo</div>
+    </div>
+    <p style="margin-bottom:20px">Conversación privada con el agente tutor. Cuando termines vuelves exactamente donde estabas.</p>
+
+    <div class="card">
+      <div class="label">Agente tutor</div>
+      <div class="chat-wrap" id="detourChat"></div>
+      <div class="chat-input-row" id="detourInputRow">
+        <textarea id="detourInput" rows="2" placeholder="Escribe tu duda o respuesta… (Ctrl+Enter para enviar)"></textarea>
+        <button class="btn btn-accent" onclick="sendDetourMsg()" id="detourSendBtn">Enviar</button>
+      </div>
+    </div>
+
+    <!-- Exercise (appears after chat) -->
+    <div class="card mt-12" id="detourExercise" style="display:none">
+      <h2>Ejercicio práctico</h2>
+      <p style="margin-bottom:12px">Completa la función para que devuelva la categoría correcta según la nota:</p>
+      <pre style="background:#1e1e2e;color:#cdd6f4;border-radius:8px;padding:14px;font-size:13px;overflow-x:auto;margin-bottom:10px"># Categorías:
+# 90-100 → "Sobresaliente"
+# 70-89  → "Notable"
+# 50-69  → "Aprobado"
+# 0-49   → "Suspenso"
+
+def calificar(nota):
+    # escribe aquí tu código
+</pre>
+      <textarea class="code-area" id="codeInput" placeholder="def calificar(nota):&#10;    if nota >= 90:&#10;        return &quot;Sobresaliente&quot;&#10;    ..."># Escribe tu solución aquí
+def calificar(nota):
+    </textarea>
+      <div class="flex gap-8 mt-8">
+        <button class="btn btn-accent btn-sm" onclick="runCode()">▶ Ejecutar</button>
+        <button class="btn btn-muted btn-sm" onclick="showSolution()">Ver solución</button>
+      </div>
+      <div class="code-result" id="codeResult"></div>
+    </div>
+
+    <div class="return-banner mt-16" id="returnBanner" style="display:none">
+      <div class="rb-icon">✅</div>
+      <div>
+        <strong>Callejón completado.</strong> Has reforzado los condicionales con un ejercicio real.<br>
+        <span class="text-muted">Este callejón quedará en tu mapa personal de exploración.</span>
+      </div>
+      <button class="btn btn-primary btn-sm ml-auto" onclick="returnToRoad()">Volver al camino →</button>
+    </div>
+
+    <div class="flex mt-8 gap-8" id="detourBackRow">
+      <button class="btn btn-muted btn-sm" onclick="returnToRoad()">← Volver sin completar</button>
+    </div>
+  </div>
+
+  <!-- ═════════════════════════════════════════
+       SCREEN 5 — Callejón de PROFUNDIZACIÓN (solo Ana)
+  ═════════════════════════════════════════ -->
+  <div class="screen" id="screen-5">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+      <div style="background:var(--teal);color:#fff;border-radius:6px;padding:3px 10px;font-size:12px;font-weight:700">CALLEJÓN DE PROFUNDIZACIÓN</div>
+      <div class="section-title" style="margin:0">Condicionales anidados y casos límite</div>
+    </div>
+    <p style="margin-bottom:20px">Más allá del temario estándar. Opcional. Puedes salir en cualquier momento.</p>
+
+    <div class="card">
+      <h2>¿Cuándo un if dentro de un if se vuelve un problema?</h2>
+      <p style="margin-bottom:12px">Analiza este fragmento. ¿Cuántos caminos de ejecución posibles hay? ¿Qué pasa si <code style="background:#f3f4f6;padding:1px 5px;border-radius:4px">x = 0</code>?</p>
+      <pre style="background:#1e1e2e;color:#cdd6f4;border-radius:8px;padding:14px;font-size:13px;overflow-x:auto;margin-bottom:16px">def clasificar(x, y):
+    if x > 0:
+        if y > 0:
+            return "Q1"
+        else:
+            return "Q2"
+    elif x < 0:
+        if y > 0:
+            return "Q3"
+        else:
+            return "Q4"
+    else:
+        return "eje Y"</pre>
+
+      <div class="highlight-box mt-12">
+        <div class="label">Reflexiona antes de responder</div>
+        <p>¿Qué devuelve la función cuando <code style="background:#fff;padding:1px 5px;border-radius:4px">x=0</code> e <code style="background:#fff;padding:1px 5px;border-radius:4px">y=-5</code>? ¿Y cuántos casos no están cubiertos?</p>
+      </div>
+      <div class="flex gap-8 mt-12">
+        <button class="btn btn-teal btn-sm" onclick="showDeepAnswer()">Ver análisis</button>
+      </div>
+      <div class="card mt-12" id="deepAnswer" style="display:none;background:var(--teal-bg);border-color:#99f6e4">
+        <h3 style="color:var(--teal);margin-bottom:8px">Análisis</h3>
+        <p>Cuando <code style="background:#fff;padding:1px 4px;border-radius:4px">x=0</code> la función devuelve <code style="background:#fff;padding:1px 4px;border-radius:4px">"eje Y"</code> sin importar el valor de <code>y</code>. Hay <strong>5 caminos</strong> de ejecución. El caso <code>x=0, y=0</code> (origen) queda agrupado con cualquier punto en el eje Y — puede ser una decisión de diseño o un bug silencioso.</p>
+        <p style="margin-top:8px">La forma de hacer este código más legible sin perder precisión es usando <strong>early returns</strong> o una tabla de decisión. Esto se llama <em>complejidad ciclomática</em> y es una métrica real de calidad de código.</p>
+      </div>
+    </div>
+
+    <div class="return-banner mt-16" id="deepReturnBanner" style="display:none">
+      <div class="rb-icon">🔭</div>
+      <div>
+        <strong>Profundización completada.</strong> Este callejón aparecerá en tu mapa personal.<br>
+        <span class="text-muted">Contenido fuera del temario estándar — solo tú lo has explorado.</span>
+      </div>
+      <button class="btn btn-primary btn-sm ml-auto" onclick="returnToRoadFromDeep()">Volver al camino →</button>
+    </div>
+
+    <div class="flex mt-8 gap-8">
+      <button class="btn btn-muted btn-sm" onclick="returnToRoadFromDeep()">← Volver sin completar</button>
+    </div>
+  </div>
+
+  <!-- ═════════════════════════════════════════
+       SCREEN 6 — Mapa personal de exploración
+  ═════════════════════════════════════════ -->
+  <div class="screen" id="screen-6">
+    <div class="section-title">🗺 Tu mapa de exploración</div>
+    <p style="margin-bottom:20px">El camino estándar es la autopista. Los callejones son tuyos. Nadie más tiene exactamente este mapa.</p>
+
+    <div class="map-container">
+      <!-- Lane: camino estándar -->
+      <div class="label">Camino estándar</div>
+      <div class="map-lane">
+        <div class="map-nodes" id="mainLaneNodes">
+          <!-- rendered by JS -->
+        </div>
+      </div>
+
+      <!-- Lane: callejones -->
+      <div class="label mt-12">Tus callejones</div>
+      <div class="map-lane">
+        <div class="map-nodes" id="detourLaneNodes">
+          <!-- rendered by JS -->
+        </div>
+      </div>
+    </div>
+
+    <div class="map-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--ok);border-color:var(--ok)"></div> Completado</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--primary);border-color:var(--primary)"></div> Aquí estás</div>
+      <div class="legend-item"><div class="legend-dot" style="border-color:var(--border)"></div> Pendiente</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--accent);border-color:var(--accent)"></div> Callejón explorado</div>
+    </div>
+
+    <div class="card mt-16">
+      <h2>Tu huella personal</h2>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:4px">
+        <div style="text-align:center">
+          <div style="font-size:28px;font-weight:700;color:var(--primary)" id="mapStatMain">3</div>
+          <div class="text-muted">bloques del estándar</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:28px;font-weight:700;color:var(--accent)" id="mapStatDetour">0</div>
+          <div class="text-muted">callejones explorados</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:28px;font-weight:700;color:var(--muted)">~52</div>
+          <div class="text-muted">min de exploración</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex mt-16 gap-8">
+      <button class="btn btn-muted btn-sm" onclick="goToScreen(prevScreen || 1)">← Volver</button>
+    </div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+<div class="proto-badge">PROTOTIPO DESECHABLE</div>
+
+<script>
+/* ══════════════════════════════════════════════
+   State
+══════════════════════════════════════════════ */
+let profile = "ana"; // "ana" | "carlos"
+let currentScreen = 1;
+let prevScreen = 1;
+
+let state = {
+  quizScore: null,       // null | number (0-3)
+  detourReinforce: false, // completado
+  detourDeep: false,      // completado
+};
+
+/* ══════════════════════════════════════════════
+   IndexedDB
+══════════════════════════════════════════════ */
+let db;
+function openDB() {
+  const req = indexedDB.open("ai2learn_proto_estudiante", 1);
+  req.onupgradeneeded = e => {
+    e.target.result.createObjectStore("state", { keyPath: "key" });
+  };
+  req.onsuccess = e => {
+    db = e.target.result;
+    loadState();
+  };
+}
+function saveState() {
+  if (!db) return;
+  const tx = db.transaction("state", "readwrite");
+  const st = tx.objectStore("state");
+  st.put({ key: "appState", value: state });
+  st.put({ key: "profile", value: profile });
+}
+function loadState() {
+  if (!db) return;
+  const tx = db.transaction("state", "readonly");
+  tx.objectStore("state").get("appState").onsuccess = e => {
+    if (e.target.result) { state = e.target.result.value; }
+  };
+  tx.objectStore("state").get("profile").onsuccess = e => {
+    if (e.target.result) applyProfile(e.target.result.value, false);
+  };
+}
+
+/* ══════════════════════════════════════════════
+   Profile
+══════════════════════════════════════════════ */
+function switchProfile(p) {
+  applyProfile(p, true);
+}
+function applyProfile(p, reset) {
+  profile = p;
+  if (reset) {
+    state = { quizScore: null, detourReinforce: false, detourDeep: false };
+    document.getElementById("detourChat").innerHTML = "";
+    document.getElementById("detourExercise").style.display = "none";
+    document.getElementById("returnBanner").style.display = "none";
+    document.getElementById("deepAnswer").style.display = "none";
+    document.getElementById("deepReturnBanner").style.display = "none";
+    renderQuizQuestion(0);
+  }
+  document.getElementById("pbAna").classList.toggle("active", p === "ana");
+  document.getElementById("pbCarlos").classList.toggle("active", p === "carlos");
+  if (p === "ana") {
+    document.getElementById("userAvatar").textContent = "AG";
+    document.getElementById("userName").textContent = "Ana García";
+    document.getElementById("detourDeep").style.display = "flex";
+  } else {
+    document.getElementById("userAvatar").textContent = "CL";
+    document.getElementById("userName").textContent = "Carlos López";
+    document.getElementById("detourDeep").style.display = "none";
+  }
+  renderMap();
+  saveState();
+}
+
+/* ══════════════════════════════════════════════
+   Navigation
+══════════════════════════════════════════════ */
+function goToScreen(n) {
+  document.getElementById(`screen-${currentScreen}`).classList.remove("active");
+  prevScreen = currentScreen;
+  currentScreen = n;
+  document.getElementById(`screen-${n}`).classList.add("active");
+  window.scrollTo(0, 0);
+}
+function goToMap() {
+  renderMap();
+  goToScreen(6);
+}
+
+/* ══════════════════════════════════════════════
+   Quiz
+══════════════════════════════════════════════ */
+const QUESTIONS = [
+  {
+    q: "¿Qué imprime este código?\n\nx = 5\nif x > 3:\n    print('mayor')\nelse:\n    print('menor')",
+    opts: ["mayor", "menor", "Error de sintaxis", "Nada"],
+    correct: 0,
+    explain: "Como x=5 es mayor que 3, la condición es verdadera y se ejecuta el primer bloque."
+  },
+  {
+    q: "¿Cuántas veces entra el programa en el bloque if?\n\nfor i in range(5):\n    if i % 2 == 0:\n        print(i)",
+    opts: ["2", "3", "4", "5"],
+    correct: 1,
+    explain: "range(5) produce 0,1,2,3,4. Los pares son 0, 2, 4 → el bloque if se ejecuta 3 veces."
+  },
+  {
+    q: "¿Qué valor devuelve esta función?\n\ndef f(n):\n    if n > 10:\n        return 'grande'\n    elif n > 5:\n        return 'medio'\n    return 'pequeño'\n\nf(7)",
+    opts: ["'grande'", "'medio'", "'pequeño'", "None"],
+    correct: 1,
+    explain: "7 no es mayor que 10, pero sí mayor que 5 → entra en elif y devuelve 'medio'."
+  }
+];
+
+let currentQ = 0;
+let answers  = [];
+let selected = null;
+let revealed = false;
+
+function renderQuizQuestion(i) {
+  currentQ = i;
+  selected = null;
+  revealed = false;
+  const q = QUESTIONS[i];
+  document.getElementById("qNum").textContent = `Pregunta ${i+1} de ${QUESTIONS.length}`;
+  document.getElementById("qText").innerHTML = "<pre style='font-family:inherit;white-space:pre-wrap'>" + q.q + "</pre>";
+  const optEl = document.getElementById("qOptions");
+  optEl.innerHTML = "";
+  const letters = ["A","B","C","D"];
+  q.opts.forEach((opt, idx) => {
+    const el = document.createElement("div");
+    el.className = "quiz-option";
+    el.innerHTML = `<div class="opt-letter">${letters[idx]}</div><span>${opt}</span>`;
+    el.onclick = () => selectOption(idx, el);
+    optEl.appendChild(el);
+  });
+  document.getElementById("qFeedback").classList.remove("show","ok","err");
+  document.getElementById("qFeedback").textContent = "";
+  document.getElementById("qNextBtn").style.display = "none";
+  document.getElementById("qFinishBtn").style.display = "none";
+}
+
+function selectOption(idx, el) {
+  if (revealed) return;
+  revealed = true;
+  selected = idx;
+  const q = QUESTIONS[currentQ];
+  const opts = document.querySelectorAll(".quiz-option");
+  opts.forEach((o, i) => {
+    if (i === q.correct) o.classList.add("reveal-correct");
+  });
+  if (idx === q.correct) {
+    el.classList.add("correct");
+  } else {
+    el.classList.add("wrong");
+  }
+  const fb = document.getElementById("qFeedback");
+  fb.textContent = (idx === q.correct ? "✅ Correcto — " : "❌ Incorrecto — ") + q.explain;
+  fb.className = "quiz-feedback show " + (idx === q.correct ? "ok" : "err");
+
+  answers[currentQ] = idx === q.correct;
+
+  if (currentQ < QUESTIONS.length - 1) {
+    document.getElementById("qNextBtn").style.display = "inline-flex";
+  } else {
+    document.getElementById("qFinishBtn").style.display = "inline-flex";
+  }
+}
+
+function nextQuestion() {
+  renderQuizQuestion(currentQ + 1);
+}
+
+function finishQuiz() {
+  const score = answers.filter(Boolean).length;
+  state.quizScore = score;
+  saveState();
+
+  // Show result screen
+  goToScreen(3);
+
+  const title = document.getElementById("resultTitle");
+  const body  = document.getElementById("resultBody");
+
+  if (score === QUESTIONS.length) {
+    title.textContent = "¡Perfecto! 3/3";
+    body.innerHTML = `
+      <div style="font-size:40px;text-align:center;margin-bottom:8px">🎉</div>
+      <p style="text-align:center;font-size:15px;color:var(--ok);font-weight:600">Has respondido correctamente las 3 preguntas.</p>
+      <p style="text-align:center;margin-top:8px">Dominas el tema. El camino estándar continúa, o...</p>`;
+    document.getElementById("detourDeepCallout").style.display = profile === "ana" ? "block" : "none";
+    document.getElementById("detourReinforceCallout").style.display = "none";
+  } else if (score >= 1) {
+    title.textContent = `Resultado: ${score}/3`;
+    body.innerHTML = `
+      <p style="font-size:15px;font-weight:600">Tienes ${score} de 3 correctas. Bien encaminado, pero hay margen de mejora.</p>
+      <p style="margin-top:8px">Puedes continuar con el camino estándar, o el agente puede ayudarte con lo que ha fallado.</p>`;
+    document.getElementById("detourReinforceCallout").style.display = profile === "carlos" ? "block" : "none";
+    document.getElementById("detourDeepCallout").style.display = "none";
+  } else {
+    title.textContent = `Resultado: 0/3`;
+    body.innerHTML = `
+      <div style="font-size:36px;text-align:center;margin-bottom:8px">😕</div>
+      <p style="text-align:center;font-size:15px;color:var(--err);font-weight:600">Ninguna respuesta correcta.</p>
+      <p style="text-align:center;margin-top:8px">El agente puede ayudarte a entender qué ha pasado.</p>`;
+    document.getElementById("detourReinforceCallout").style.display = "block";
+    document.getElementById("detourDeepCallout").style.display = "none";
+  }
+}
+
+/* ══════════════════════════════════════════════
+   Detour — refuerzo (screen 4)
+══════════════════════════════════════════════ */
+function goToDetourReinforce() {
+  goToScreen(4);
+  if (document.getElementById("detourChat").children.length === 0) {
+    initDetourChat();
+  }
+}
+
+function skipDetour() {
+  showToast("Continuando en el camino estándar");
+  goToScreen(1);
+}
+
+const DETOUR_INIT = `Hola, Carlos. He visto que los condicionales anidados te han generado dudas en el quiz. Vamos a verlo desde otro ángulo.
+
+Imagina que eres un portero de discoteca. Tus reglas son:
+1. Si la persona es mayor de edad **y** tiene invitación → entra
+2. Si es mayor de edad pero sin invitación → espera
+3. Si es menor → no entra
+
+¿Cómo lo escribirías en Python? No te preocupes si no sale perfecto, escríbelo como lo pienses.`;
+
+const DETOUR_RESPONSES = [
+  { trigger: ["if","elif","else","edad","mayor","menor","invit","entra","espera"], reply: "¡Eso es! Ves cómo el if exterior filtra la condición más general (la edad) y el if interior la más específica (la invitación).\n\nEsta jerarquía es clave: **del caso más general al más específico**. Ahora, ¿puedes decirme qué pasaría si la persona tiene exactamente 18 años y tu condición es `edad > 18`?", exercise: false },
+  { trigger: ["18","exactamente","límite","borde","igual"], reply: "Exacto — con `edad > 18` alguien de exactamente 18 años **no entraría**, porque 18 no es estrictamente mayor que 18. Esto se llama un **caso límite** y es uno de los bugs más comunes en código real.\n\nLa corrección es `edad >= 18`. Este detalle parece trivial pero en producción puede afectar a miles de usuarios.\n\nAhora te propongo un ejercicio práctico para consolidarlo 👇", exercise: true },
+  { trigger: ["no","entiendo","duda","confus","clar","explica"], reply: "Tranquilo. Vamos paso a paso.\n\nUn `if` anidado simplemente es una pregunta dentro de otra pregunta. Primero preguntas lo más amplio, luego afinas.\n\n¿Cuál parte te genera más duda: el operador `and`, la jerarquía de los `if`, o el caso `else`?", exercise: false },
+];
+
+function initDetourChat() {
+  addDetourBubble("agent", DETOUR_INIT);
+}
+
+function addDetourBubble(role, text) {
+  const c = document.getElementById("detourChat");
+  const b = document.createElement("div");
+  b.className = `bubble ${role}`;
+  const lbl = role === "agent" ? "Agente tutor" : "Tú";
+  b.innerHTML = `<div class="bubble-label">${lbl}</div><div class="bubble-body">${markdownLite(text)}</div>`;
+  c.appendChild(b);
+  c.scrollTop = c.scrollHeight;
+}
+
+function sendDetourMsg() {
+  const inp = document.getElementById("detourInput");
+  const msg = inp.value.trim();
+  if (!msg) return;
+  inp.value = "";
+  addDetourBubble("user", msg);
+
+  const btn = document.getElementById("detourSendBtn");
+  btn.disabled = true;
+
+  const low = msg.toLowerCase();
+  let response = DETOUR_RESPONSES.find(r => r.trigger.some(t => low.includes(t)));
+  if (!response) response = { reply: "Bien. Sigue pensando en voz alta — eso es exactamente como se aprende a programar. ¿Qué parte del condicional te resulta más difícil de visualizar?", exercise: false };
+
+  // typing
+  const c = document.getElementById("detourChat");
+  const typing = document.createElement("div");
+  typing.className = "bubble agent"; typing.id = "typingBubble";
+  typing.innerHTML = `<div class="bubble-label">Agente tutor</div><div class="bubble-body"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  c.appendChild(typing); c.scrollTop = c.scrollHeight;
+
+  setTimeout(() => {
+    typing.remove();
+    addDetourBubble("agent", response.reply);
+    btn.disabled = false;
+    if (response.exercise) {
+      document.getElementById("detourExercise").style.display = "block";
+      document.getElementById("detourExercise").scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, 1100 + Math.random() * 700);
+}
+
+function runCode() {
+  const code = document.getElementById("codeInput").value;
+  const res  = document.getElementById("codeResult");
+  const hasIf = code.includes("if");
+  const hasReturn = code.includes("return");
+  const hasAll = ["Sobresaliente","Notable","Aprobado","Suspenso"].every(s => code.includes(s));
+
+  if (hasIf && hasReturn && hasAll) {
+    res.className = "code-result ok";
+    res.textContent = "✅ Tests pasados:\n  calificar(95)  → 'Sobresaliente'\n  calificar(75)  → 'Notable'\n  calificar(55)  → 'Aprobado'\n  calificar(30)  → 'Suspenso'";
+    showReturnBanner();
+  } else if (!hasIf) {
+    res.className = "code-result err";
+    res.textContent = "❌ Falta la estructura condicional (if/elif)";
+  } else if (!hasReturn) {
+    res.className = "code-result err";
+    res.textContent = "❌ Recuerda añadir return en cada rama";
+  } else {
+    res.className = "code-result err";
+    res.textContent = "❌ Alguna categoría falta o tiene un typo. Comprueba que las cadenas coinciden exactamente.";
+  }
+}
+
+function showSolution() {
+  document.getElementById("codeInput").value =
+`def calificar(nota):
+    if nota >= 90:
+        return "Sobresaliente"
+    elif nota >= 70:
+        return "Notable"
+    elif nota >= 50:
+        return "Aprobado"
+    else:
+        return "Suspenso"`;
+  showToast("Solución mostrada — entiéndela y luego prueba a escribirla de memoria");
+}
+
+function showReturnBanner() {
+  state.detourReinforce = true;
+  saveState();
+  document.getElementById("returnBanner").style.display = "flex";
+  document.getElementById("detourBackRow").style.display = "none";
+  document.getElementById("detourInputRow").style.display = "none";
+  document.getElementById("returnBanner").scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function returnToRoad() {
+  renderMap();
+  goToScreen(1);
+  if (state.detourReinforce) showToast("✅ Callejón de refuerzo completado — aparece en tu mapa");
+}
+
+/* ══════════════════════════════════════════════
+   Detour — profundización (screen 5)
+══════════════════════════════════════════════ */
+function goToDetourDeep() {
+  goToScreen(5);
+}
+
+function showDeepAnswer() {
+  document.getElementById("deepAnswer").style.display = "block";
+  state.detourDeep = true;
+  saveState();
+  setTimeout(() => {
+    document.getElementById("deepReturnBanner").style.display = "flex";
+  }, 600);
+}
+
+function returnToRoadFromDeep() {
+  renderMap();
+  goToScreen(1);
+  if (state.detourDeep) showToast("🔭 Callejón de profundización añadido a tu mapa");
+}
+
+/* ══════════════════════════════════════════════
+   Map
+══════════════════════════════════════════════ */
+const MAIN_NODES = [
+  { label: "Intro al pensamiento computacional", icon: "📖", status: "done" },
+  { label: "Vídeo: Condicionales paso a paso", icon: "🎬", status: "done" },
+  { label: "Mini-quiz: Condicionales", icon: "❓", status: "active" },
+  { label: "Ejercicios prácticos", icon: "✏️", status: "pending" },
+  { label: "Examen módulo 2", icon: "📝", status: "pending" },
+  { label: "Módulo 3...", icon: "🔒", status: "pending" },
+];
+
+function renderMap() {
+  renderLane("mainLaneNodes", MAIN_NODES, false);
+
+  const detourNodes = [];
+  if (state.detourDeep)      detourNodes.push({ label: "Profundización: condicionales anidados", icon: "🔭", status: "detour-done" });
+  if (state.detourReinforce) detourNodes.push({ label: "Refuerzo: condicionales desde otro ángulo", icon: "🛠", status: "detour-done" });
+  if (detourNodes.length === 0) {
+    detourNodes.push({ label: "Sin callejones explorados aún", icon: "—", status: "pending" });
+  }
+  renderLane("detourLaneNodes", detourNodes, true);
+
+  const detourCount = [state.detourDeep, state.detourReinforce].filter(Boolean).length;
+  document.getElementById("mapStatDetour").textContent = detourCount;
+}
+
+function renderLane(containerId, nodes, isDetour) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
+  nodes.forEach((n, i) => {
+    const node = document.createElement("div");
+    node.className = `map-node ${n.status}`;
+    node.innerHTML = `<span title="${n.label}">${n.icon}</span><div class="map-node-tip">${n.label}</div>`;
+    container.appendChild(node);
+    if (i < nodes.length - 1) {
+      const conn = document.createElement("div");
+      conn.className = `map-connector ${n.status === "done" || n.status === "detour-done" ? "done" : ""}`;
+      container.appendChild(conn);
+    }
+  });
+}
+
+/* ══════════════════════════════════════════════
+   Utilities
+══════════════════════════════════════════════ */
+function markdownLite(text) {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/`(.+?)`/g, "<code style='background:#e5e7eb;padding:1px 4px;border-radius:4px'>$1</code>")
+    .replace(/\n/g, "<br>");
+}
+
+let toastTimer;
+function showToast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 2800);
+}
+
+document.addEventListener("keydown", e => {
+  if (e.key === "Enter" && e.ctrlKey && currentScreen === 4) sendDetourMsg();
+});
+
+/* ══════════════════════════════════════════════
+   Init
+══════════════════════════════════════════════ */
+openDB();
+goToScreen(1);
+applyProfile("ana", false);
+renderQuizQuestion(0);
+</script>
+</body>
+</html>
