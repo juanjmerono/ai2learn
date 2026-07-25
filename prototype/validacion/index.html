@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<!-- PROTOTIPO DESECHABLE — no promover a producción -->
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI2Learn — Validación de la idea</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:       #f5f4f1;
+  --surface:  #ffffff;
+  --border:   #e2e0db;
+  --primary:  #2563eb;
+  --teal:     #0d9488;
+  --accent:   #7c3aed;
+  --amber:    #d97706;
+  --muted:    #6b7280;
+  --text:     #111827;
+  --radius:   12px;
+  --shadow:   0 2px 8px rgba(0,0,0,.09);
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 32px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.logo { font-weight: 800; font-size: 20px; color: var(--primary); letter-spacing: -.5px; }
+.header-right { display: flex; align-items: center; gap: 16px; }
+.header-badge {
+  background: #fee2e2; color: #991b1b;
+  font-size: 11px; font-weight: 700;
+  padding: 3px 10px; border-radius: 20px;
+}
+.back-link {
+  font-size: 13px; color: var(--muted); text-decoration: none;
+  display: flex; align-items: center; gap: 4px;
+}
+.back-link:hover { color: var(--primary); }
+
+/* Hero */
+.hero {
+  text-align: center;
+  padding: 56px 24px 40px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+.hero-label {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .8px; color: var(--muted); margin-bottom: 12px;
+}
+.hero h1 {
+  font-size: 30px; font-weight: 800; line-height: 1.25;
+  margin-bottom: 14px;
+}
+.hero h1 span { color: var(--primary); }
+.hero p {
+  font-size: 15px; line-height: 1.7; color: var(--muted);
+}
+
+/* Veredicto banner */
+.veredicto {
+  max-width: 720px; margin: 0 auto 48px;
+  padding: 0 24px;
+}
+.veredicto-inner {
+  background: #f0fdf4;
+  border: 1.5px solid #86efac;
+  border-radius: var(--radius);
+  padding: 20px 24px;
+}
+.veredicto-label {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .6px; color: #16a34a; margin-bottom: 8px;
+}
+.veredicto-inner p { font-size: 14px; line-height: 1.7; color: var(--text); }
+.veredicto-inner strong { color: #15803d; }
+
+/* Questions layout */
+.questions {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* Question card */
+.q-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.q-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 24px 24px 0;
+}
+.q-number {
+  width: 32px; height: 32px; border-radius: 50%;
+  font-size: 13px; font-weight: 800; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  margin-top: 2px;
+}
+.q-meta { flex: 1; }
+.q-type {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .8px; margin-bottom: 4px;
+}
+.q-card-header h2 {
+  font-size: 17px; font-weight: 800; line-height: 1.35;
+  margin-bottom: 0;
+}
+
+/* Colors per type */
+.type-research .q-number { background: #eff6ff; color: var(--primary); }
+.type-research .q-type   { color: var(--primary); }
+.type-grilling .q-number { background: #f5f3ff; color: var(--accent); }
+.type-grilling .q-type   { color: var(--accent); }
+
+.q-question-box {
+  margin: 16px 24px 0;
+  background: var(--bg);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 13px; color: var(--muted); line-height: 1.65;
+  font-style: italic;
+}
+
+.q-answer {
+  padding: 20px 24px 24px;
+}
+
+/* Gap list */
+.gap-list {
+  display: flex; flex-direction: column; gap: 10px;
+  margin-bottom: 0;
+}
+.gap-item {
+  display: flex; gap: 12px; align-items: flex-start;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 13px; line-height: 1.6;
+}
+.gap-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.gap-item strong { display: block; font-size: 12px; font-weight: 700; color: var(--primary); margin-bottom: 2px; }
+
+/* Comparison table */
+.comp-table-wrap { overflow-x: auto; margin-bottom: 0; }
+.comp-table {
+  width: 100%; border-collapse: collapse; font-size: 12.5px; line-height: 1.5;
+}
+.comp-table th {
+  background: var(--bg); border: 1px solid var(--border);
+  padding: 8px 12px; text-align: left; font-weight: 700; color: var(--muted);
+  font-size: 11px; text-transform: uppercase; letter-spacing: .4px;
+}
+.comp-table td {
+  border: 1px solid var(--border);
+  padding: 9px 12px; vertical-align: top;
+}
+.comp-table tr:hover td { background: #fafaf9; }
+.comp-table td:first-child { font-weight: 700; }
+
+/* Two-col answer layout */
+.answer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 0;
+}
+@media (max-width: 600px) { .answer-grid { grid-template-columns: 1fr; } }
+.answer-cell {
+  border-radius: 8px;
+  padding: 14px 16px;
+  font-size: 13px; line-height: 1.6;
+}
+.answer-cell h4 {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .6px; margin-bottom: 6px;
+}
+.cell-green  { background: #f0fdf4; border: 1px solid #86efac; }
+.cell-green h4 { color: #16a34a; }
+.cell-amber  { background: #fffbeb; border: 1px solid #fcd34d; }
+.cell-amber h4 { color: var(--amber); }
+.cell-blue   { background: #eff6ff; border: 1px solid #bfdbfe; }
+.cell-blue h4 { color: var(--primary); }
+.cell-purple { background: #f5f3ff; border: 1px solid #ddd6fe; }
+.cell-purple h4 { color: var(--accent); }
+
+/* Block list */
+.block-list { display: flex; flex-direction: column; gap: 8px; }
+.block-item {
+  background: var(--bg);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 13px; line-height: 1.6;
+  border-left: 3px solid var(--border);
+}
+.block-item strong { display: block; font-weight: 700; font-size: 12px; margin-bottom: 2px; color: var(--text); }
+.block-item.severity-high   { border-left-color: #ef4444; }
+.block-item.severity-medium { border-left-color: var(--amber); }
+.block-item.severity-low    { border-left-color: #22c55e; }
+.severity-tag {
+  display: inline-block;
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .4px; padding: 1px 6px; border-radius: 4px; margin-bottom: 4px;
+}
+.severity-high   .severity-tag { background: #fee2e2; color: #dc2626; }
+.severity-medium .severity-tag { background: #fef3c7; color: #b45309; }
+.severity-low    .severity-tag { background: #dcfce7; color: #16a34a; }
+
+/* Role split */
+.role-split { display: flex; flex-direction: column; gap: 10px; }
+.role-block {
+  border-radius: 8px; padding: 14px 16px;
+  font-size: 13px; line-height: 1.6;
+}
+.role-block h4 {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .6px; margin-bottom: 6px;
+}
+.role-docente   { background: #eff6ff; border: 1px solid #bfdbfe; }
+.role-docente h4 { color: var(--primary); }
+.role-estudiante { background: #f0fdfa; border: 1px solid #99f6e4; }
+.role-estudiante h4 { color: var(--teal); }
+.role-sistema   { background: #f5f3ff; border: 1px solid #ddd6fe; }
+.role-sistema h4 { color: var(--accent); }
+
+ul.plain { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+ul.plain li::before { content: "— "; color: var(--muted); }
+
+/* Cost pill */
+.cost-highlight {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: #f0fdf4; border: 1px solid #86efac;
+  border-radius: 8px; padding: 10px 16px;
+  font-size: 13px; margin-top: 12px;
+}
+.cost-highlight strong { color: #15803d; }
+
+/* Footer */
+footer {
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  padding: 14px 32px;
+  font-size: 12px; color: var(--muted);
+  display: flex; align-items: center; justify-content: space-between;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">AI2Learn</div>
+  <div class="header-right">
+    <a class="back-link" href="../index.html">← Volver a prototipos</a>
+    <div class="header-badge">PROTOTIPOS DESECHABLES</div>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-label">Contexto de los prototipos</div>
+  <h1>Por qué existe <span>AI2Learn</span></h1>
+  <p>Cinco preguntas de validación respondidas antes de construir nada. Esta página recoge la investigación y el razonamiento que fundamenta las decisiones de diseño de los prototipos.</p>
+</div>
+
+<div class="veredicto">
+  <div class="veredicto-inner">
+    <div class="veredicto-label">Veredicto de la validación</div>
+    <p>La idea es <strong>diferenciada, técnicamente viable y con un rol docente claro.</strong> El mercado está bifurcado entre LMS institucionales con IA superficial y agentes IA educativos sobre contenido cerrado. Ningún producto combina las tres piezas: LMS completo + agente tutor sobre material propio del docente + educación superior como segmento nativo. La tecnología de 2026 permite construirlo con costes viables (&lt;$1/estudiante/mes con modelos optimizados).</p>
+  </div>
+</div>
+
+<div class="questions">
+
+  <!-- 01 — MERCADO -->
+  <div class="q-card type-research">
+    <div class="q-card-header">
+      <div class="q-number">1</div>
+      <div class="q-meta">
+        <div class="q-type">Investigación de mercado</div>
+        <h2>¿Qué herramientas similares existen ya en el mercado?</h2>
+      </div>
+    </div>
+    <div class="q-question-box">
+      ¿Existen ya LMS o plataformas EdTech que combinen un agente IA con personalización del itinerario de aprendizaje en educación superior? ¿Qué hace cada uno, cuáles son sus limitaciones y en qué se diferencia la propuesta?
+    </div>
+    <div class="q-answer">
+
+      <div class="comp-table-wrap">
+        <table class="comp-table">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Capacidades IA</th>
+              <th>Limitación clave</th>
+              <th>Segmento</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Canvas + IA</td>
+              <td>Generación de rúbricas/quizzes para docentes, analítica de riesgo</td>
+              <td>Sin agente tutor activo; IA como copiloto del docente, no del alumno</td>
+              <td>Ed. superior, K-12</td>
+            </tr>
+            <tr>
+              <td>Moodle + plugins</td>
+              <td>Generación de preguntas, feedback básico</td>
+              <td>Personalización manual; no agentividad real</td>
+              <td>Institucional, open-source</td>
+            </tr>
+            <tr>
+              <td>Coursera Coach</td>
+              <td>Chatbot sobre catálogo, recomendación de paths</td>
+              <td>Contenido cerrado (catálogo Coursera); no material del docente</td>
+              <td>MOOCs, formación corp.</td>
+            </tr>
+            <tr>
+              <td>Khanmigo</td>
+              <td>Tutoría socrática, materiales docentes, progreso de clase</td>
+              <td>Solo contenido KA; K-12; sin modelo universitario EU; sin herramienta de autor</td>
+              <td>K-12, EE.UU.</td>
+            </tr>
+            <tr>
+              <td>Duolingo Max</td>
+              <td>Roleplay adaptativo, video call IA, feedback de respuesta</td>
+              <td>Dominio cerrado (idiomas); B2C; sin rol docente</td>
+              <td>Consumidor, idiomas</td>
+            </tr>
+            <tr>
+              <td>ALEKS (McGraw-Hill)</td>
+              <td>Evaluación adaptativa, path personalizado</td>
+              <td>Dominio cerrado (STEM); sin IA generativa conversacional</td>
+              <td>Ed. superior STEM</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-top:20px;margin-bottom:10px;font-size:13px;font-weight:700;color:var(--text)">Los cinco huecos que nadie cubre</div>
+      <div class="gap-list">
+        <div class="gap-item">
+          <div class="gap-icon">📂</div>
+          <div><strong>Gap 1 — Contenido propio del docente como base del agente</strong>Ninguna plataforma permite al docente cargar su material y que el agente lo use como base para generar ejercicios, adaptar explicaciones y construir el itinerario del estudiante.</div>
+        </div>
+        <div class="gap-item">
+          <div class="gap-icon">🔗</div>
+          <div><strong>Gap 2 — LMS completo + agente tutor + herramienta de autor en un solo sistema</strong>El LMS y el agente IA existen por separado; no hay integración nativa donde el ciclo completo ocurra en un mismo entorno.</div>
+        </div>
+        <div class="gap-item">
+          <div class="gap-icon">🏗️</div>
+          <div><strong>Gap 3 — Docente como arquitecto pedagógico, no productor de contenido</strong>Nadie ha diseñado un modelo donde el docente define restricciones curriculares y el agente genera contenido dinámicamente dentro de ellas.</div>
+        </div>
+        <div class="gap-item">
+          <div class="gap-icon">🎓</div>
+          <div><strong>Gap 4 — Educación superior como segmento nativo</strong>Las iniciativas IA más avanzadas apuntan a K-12 o idiomas. Los LMS universitarios han añadido IA como feature, no como rediseño. El segmento universitario tiene necesidades propias no atendidas.</div>
+        </div>
+        <div class="gap-item">
+          <div class="gap-icon">↔️</div>
+          <div><strong>Gap 5 — Bucle bidireccional docente-agente</strong>Los sistemas reportan analytics al docente pero no permiten que el docente retroalimente al agente para ajustar su comportamiento pedagógico en tiempo real.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 02 — ENCAJE EDUCACIÓN SUPERIOR -->
+  <div class="q-card type-grilling">
+    <div class="q-card-header">
+      <div class="q-number">2</div>
+      <div class="q-meta">
+        <div class="q-type">Análisis de encaje</div>
+        <h2>¿Encaja el modelo agéntico en el contexto de educación superior?</h2>
+      </div>
+    </div>
+    <div class="q-question-box">
+      La educación superior tiene restricciones propias: acreditaciones, guías docentes fijas, evaluación reglada, culturas institucionales conservadoras. ¿Qué aspectos del modelo encajan o chocan con esas restricciones?
+    </div>
+    <div class="q-answer">
+      <div class="role-split">
+        <div class="role-block role-sistema">
+          <h4>Solución de diseño</h4>
+          <p><strong>Dos carriles paralelos:</strong> el camino estándar (diseñado por el docente, siempre visible y accesible) coexiste con un carril personalizado por el agente tutor. El estudiante puede moverse entre ambos en cualquier momento. El material oficial nunca desaparece — esto resuelve el problema de las guías docentes formales (ANECA y equivalentes).</p>
+        </div>
+        <div class="answer-grid">
+          <div class="answer-cell cell-blue">
+            <h4>Control en capas</h4>
+            <ul class="plain">
+              <li>El docente decide si el carril personalizado está disponible en su asignatura</li>
+              <li>El estudiante decide si lo usa (opt-in, habilitado por el docente)</li>
+              <li>El docente configura el margen de autonomía del agente</li>
+            </ul>
+          </div>
+          <div class="answer-cell cell-green">
+            <h4>Encaje regulatorio</h4>
+            <ul class="plain">
+              <li>La plataforma potencia el aprendizaje, no la evaluación formal</li>
+              <li>La evaluación tradicional convive como capa separada, compatible con Bolonia</li>
+              <li>El carril estándar siempre presente resuelve el conflicto con guías docentes</li>
+            </ul>
+          </div>
+        </div>
+        <div class="role-block role-docente">
+          <h4>Ganchos de adopción docente</h4>
+          <ul class="plain">
+            <li><strong>Reporting agregado:</strong> el docente ve qué conceptos no están aterrizando en la clase sin corregir exámenes manualmente</li>
+            <li><strong>Agente instructional designer:</strong> ayuda al docente a crear el camino estándar con buenas bases pedagógicas, reduciendo el coste de diseño del curso</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 03 — VIABILIDAD TÉCNICA -->
+  <div class="q-card type-research">
+    <div class="q-card-header">
+      <div class="q-number">3</div>
+      <div class="q-meta">
+        <div class="q-type">Investigación técnica</div>
+        <h2>¿Es técnicamente viable un agente tutor con las herramientas actuales?</h2>
+      </div>
+    </div>
+    <div class="q-question-box">
+      ¿Las capacidades actuales de los LLM y frameworks agénticos (LangChain, LlamaIndex, OpenAI Responses API) son suficientes para construir un agente tutor con memoria persistente por semanas, generación de ejercicios, adaptación dinámica de contenido y reporting al docente?
+    </div>
+    <div class="q-answer">
+      <div class="answer-grid" style="margin-bottom:16px">
+        <div class="answer-cell cell-green">
+          <h4>Viable hoy</h4>
+          <ul class="plain">
+            <li>Memoria persistente con RAG + BD + resúmenes de sesión</li>
+            <li>Generación de ejercicios personalizados (alta madurez)</li>
+            <li>Reporting de debilidades agregadas (caso más maduro)</li>
+            <li>Arquitectura multi-agente validada en producción (ITAS, Arapai, ELEVATE — 2026)</li>
+          </ul>
+        </div>
+        <div class="answer-cell cell-amber">
+          <h4>Viable con límites</h4>
+          <ul class="plain">
+            <li>Corrección automática de respuestas abiertas: requiere arquitectura híbrida KG + LLM</li>
+            <li>Coherencia curricular: mitigable con knowledge graph del currículo</li>
+            <li>Memoria a largo plazo: ingeniería no trivial, el perfil del estudiante es el artefacto más difícil</li>
+          </ul>
+        </div>
+      </div>
+
+      <div style="margin-bottom:10px;font-size:13px;font-weight:700;color:var(--text)">Cuellos de botella por severidad</div>
+      <div class="block-list">
+        <div class="block-item severity-high">
+          <span class="severity-tag">Severidad alta</span>
+          <strong>Corrección automática de respuestas abiertas</strong>
+          Los LLMs sobre-rechazan soluciones válidas-pero-subóptimas y sobre-validan incorrectas. Es un límite arquitectónico, no de prompting. La corrección sumativa no puede ser totalmente automática.
+        </div>
+        <div class="block-item severity-medium">
+          <span class="severity-tag">Severidad media</span>
+          <strong>Paradoja rendimiento-aprendizaje</strong>
+          Los LLMs pueden mejorar el rendimiento inmediato pero dañar el aprendizaje genuino (transferencia, metacognición). Requiere un framework pedagógico explícito codificado en el diseño del agente, no solo un LLM con prompt.
+        </div>
+        <div class="block-item severity-medium">
+          <span class="severity-tag">Severidad media</span>
+          <strong>Coherencia curricular</strong>
+          Riesgo de que el agente rompa la secuencia pedagógica del docente. Mitigable con knowledge graph del currículo que define los prerequisitos.
+        </div>
+        <div class="block-item severity-low">
+          <span class="severity-tag">Severidad baja-media</span>
+          <strong>Coste a escala</strong>
+          Manejable con modelos optimizados. Con modelos frontier sin optimización puede ser prohibitivo.
+        </div>
+      </div>
+
+      <div class="cost-highlight">
+        💰 <strong>~$0,60–1 / estudiante / mes</strong> con modelos optimizados y prompt caching — muy por debajo del coste de un libro de texto.
+      </div>
+    </div>
+  </div>
+
+  <!-- 04 — VALOR DEL DOCENTE -->
+  <div class="q-card type-grilling">
+    <div class="q-card-header">
+      <div class="q-number">4</div>
+      <div class="q-meta">
+        <div class="q-type">Análisis de propuesta de valor</div>
+        <h2>¿Qué valor único aporta el docente en este ecosistema?</h2>
+      </div>
+    </div>
+    <div class="q-question-box">
+      Si el agente tutor personaliza el contenido, genera ejercicios y evalúa respuestas, ¿qué queda para el docente? ¿Es esa propuesta suficientemente atractiva para que adopte la herramienta? ¿Qué le quitamos y qué le añadimos?
+    </div>
+    <div class="q-answer">
+      <div class="role-split">
+        <div class="role-block role-docente">
+          <h4>El rol del docente — tres capas</h4>
+          <ul class="plain">
+            <li><strong>Experto en la materia, no pedagogo:</strong> el agente instructional designer absorbe la carga pedagógica para que el docente se limite a validar y enriquecer con su conocimiento</li>
+            <li><strong>Supervisor y curador, no productor manual:</strong> el agente propone, el docente aprueba; autoridad absoluta sobre el camino estándar</li>
+            <li><strong>Mentor escalable:</strong> recibe diagnóstico agregado y puede mentorizar de forma proactiva en lugar de reactiva</li>
+          </ul>
+        </div>
+        <div class="answer-grid">
+          <div class="answer-cell cell-green">
+            <h4>Quitamos al docente</h4>
+            <ul class="plain">
+              <li>Corrección masiva de ejercicios de práctica</li>
+              <li>Diagnóstico manual del estado de la clase</li>
+              <li>Diseño pedagógico desde cero</li>
+            </ul>
+          </div>
+          <div class="answer-cell cell-blue">
+            <h4>Conserva el docente</h4>
+            <ul class="plain">
+              <li>Evaluación formal sumativa</li>
+              <li>Autoridad sobre el camino estándar</li>
+              <li>Relación directa con estudiantes que lo necesitan</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 05 — PERSPECTIVA ESTUDIANTE -->
+  <div class="q-card type-grilling">
+    <div class="q-card-header">
+      <div class="q-number">5</div>
+      <div class="q-meta">
+        <div class="q-type">Perspectiva del usuario</div>
+        <h2>¿Qué valor percibe el estudiante y qué fricciones puede encontrar?</h2>
+      </div>
+    </div>
+    <div class="q-question-box">
+      ¿Qué segmentos de estudiante se benefician más del sistema? ¿Cuáles son los riesgos de experiencia negativa y cómo se mitigan? ¿Cómo se gestiona la privacidad?
+    </div>
+    <div class="q-answer">
+      <div class="role-split">
+        <div class="role-block role-estudiante">
+          <h4>Segmentos con mayor impacto</h4>
+          <ul class="plain">
+            <li><strong>El motivado que quiere ir más allá:</strong> sin techo artificial en el carril personalizado</li>
+            <li><strong>El rezagado al borde del abandono:</strong> el agente como red de rescate temprana</li>
+            <li><strong>El medio-pasivo:</strong> usa el sistema como LMS normal — el carril estándar siempre está ahí</li>
+          </ul>
+        </div>
+        <div class="answer-grid">
+          <div class="answer-cell cell-amber">
+            <h4>Riesgo principal</h4>
+            <p>Una respuesta frustrante del agente puede acelerar el abandono del estudiante ya en riesgo. Mitigado con:</p>
+            <ul class="plain" style="margin-top:6px">
+              <li>Detección proactiva: alerta al docente ante patrones de abandono</li>
+              <li>Escalado voluntario: el estudiante deriva al docente directamente desde la interfaz</li>
+            </ul>
+          </div>
+          <div class="answer-cell cell-green">
+            <h4>Privacidad y transparencia</h4>
+            <ul class="plain">
+              <li>El agente se identifica siempre como IA — sin ambigüedad</li>
+              <li>Personalización solo con datos que el estudiante aporta voluntariamente y puede eliminar</li>
+              <li>Reporting al docente: agregado por defecto; detalle individual solo bajo demanda explícita</li>
+              <li>RGPD-compatible por diseño</li>
+            </ul>
+          </div>
+        </div>
+        <div class="role-block role-sistema">
+          <h4>Fuera del alcance del lanzamiento</h4>
+          <p>MCP para agente externo del estudiante: descartado. Abre una brecha de fuga de contenido propietario del docente hacia modelos externos que las instituciones no tolerarían.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <span>AI2Learn · Validación de la idea · Investigación julio 2026</span>
+  <span>PROTOTIPO DESECHABLE — no promover a producción</span>
+</footer>
+
+</body>
+</html>
