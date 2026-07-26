@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<!-- PROTOTIPO DESECHABLE — no promover a producción -->
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI2Learn — Mi mapa global</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f5f4f1; --surface: #ffffff; --border: #e2e0db;
+  --primary: #2563eb; --primary-h: #1d4ed8;
+  --accent: #7c3aed; --accent-bg: #faf5ff;
+  --teal: #0d9488; --teal-bg: #f0fdfa;
+  --warn: #d97706; --warn-bg: #fffbeb;
+  --ok: #16a34a; --ok-bg: #f0fdf4;
+  --muted: #6b7280; --text: #111827;
+  --radius: 10px; --shadow: 0 1px 4px rgba(0,0,0,.08);
+}
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; height: 56px; display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 50; }
+.header-badge { background: #fee2e2; color: #991b1b; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+.header-user { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); margin-left: auto; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--teal); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; }
+
+.nav-tabs { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; display: flex; gap: 0; }
+.nav-tab { padding: 12px 18px; font-size: 14px; font-weight: 500; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+.nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+.nav-tab:hover:not(.active) { color: var(--text); }
+
+main { max-width: 960px; margin: 0 auto; padding: 28px 24px 80px; }
+
+.page-header { margin-bottom: 24px; }
+.page-header h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+.page-header p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+/* Summary stats */
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 28px; }
+.stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; text-align: center; }
+.stat-num { font-size: 24px; font-weight: 700; }
+.stat-lbl { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.s-accent .stat-num { color: var(--accent); }
+.s-teal   .stat-num { color: var(--teal); }
+.s-ok     .stat-num { color: var(--ok); }
+.s-primary .stat-num { color: var(--primary); }
+
+/* Section title */
+.section-title { font-size: 17px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+
+/* Callejon cards */
+.callejones { display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
+.callejon {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.callejon-header { display: flex; align-items: center; gap: 14px; padding: 14px 18px; cursor: pointer; }
+.callejon-header:hover { background: #fafaf9; }
+.callejon-stripe { width: 4px; height: 44px; border-radius: 2px; flex-shrink: 0; }
+.callejon-info { flex: 1; }
+.callejon-subject { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin-bottom: 3px; }
+.callejon-name { font-size: 15px; font-weight: 700; }
+.callejon-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.callejon-badge { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px; flex-shrink: 0; }
+.badge-completed  { background: var(--ok-bg); color: var(--ok); }
+.badge-in-progress { background: #eff6ff; color: var(--primary); }
+.badge-type-refuerzo { background: var(--warn-bg); color: var(--warn); }
+.badge-type-profundizacion { background: var(--accent-bg); color: var(--accent); }
+
+.callejon-expand { display: none; border-top: 1px solid var(--border); padding: 14px 18px 16px; background: #fafaf9; }
+.callejon-expand.open { display: block; }
+
+.cx-steps { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.cx-step { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+.cx-step-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.cx-step.done .cx-step-dot { background: var(--ok); }
+.cx-step.current .cx-step-dot { background: var(--primary); }
+.cx-step.pending .cx-step-dot { background: var(--border); }
+.cx-step.done span { color: var(--muted); text-decoration: line-through; }
+.cx-step.current span { font-weight: 600; color: var(--primary); }
+.cx-step.pending span { color: var(--muted); }
+
+.cx-insight { background: var(--accent-bg); border: 1px solid #ddd6fe; border-radius: 8px; padding: 10px 14px; font-size: 13px; line-height: 1.5; margin-bottom: 10px; }
+.cx-insight strong { color: var(--accent); }
+
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; text-decoration: none; }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-h); }
+.btn-muted { background: #f3f4f6; color: var(--text); border: 1.5px solid var(--border); }
+.btn-muted:hover { background: #e5e7eb; }
+
+.proto-badge { position: fixed; bottom: 20px; right: 20px; background: #1f2937; color: #fff; font-size: 11px; font-weight: 600; padding: 6px 14px; border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.3); z-index: 100; pointer-events: none; }
+.toast { position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%) translateY(80px); background: #1f2937; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,.3); transition: transform .3s; z-index: 200; }
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+@media (max-width: 600px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../home-estudiante/index.html" style="font-size:13px;color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:4px;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">← Inicio</a>
+  <div class="header-badge">PROTOTIPO</div>
+  <div class="header-user">
+    <div class="avatar">AG</div>
+    <span>Ana García</span>
+  </div>
+</header>
+
+<nav class="nav-tabs">
+  <a class="nav-tab" href="../home-estudiante/index.html">🏠 Inicio</a>
+  <a class="nav-tab" href="../calendario-estudiante/index.html">📅 Calendario</a>
+  <a class="nav-tab" href="../mensajes-estudiante/index.html">💬 Mensajes</a>
+  <a class="nav-tab active" href="#">🗺 Mi mapa global</a>
+</nav>
+
+<main>
+
+  <div class="page-header">
+    <h1>Mi mapa global de exploración</h1>
+    <p>Registro de todos los callejones que has recorrido — tanto de refuerzo como de profundización. Es tuyo: el docente solo ve métricas agregadas, nunca el detalle de tus conversaciones.</p>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat s-accent">
+      <div class="stat-num">7</div>
+      <div class="stat-lbl">Callejones explorados</div>
+    </div>
+    <div class="stat s-ok">
+      <div class="stat-num">5</div>
+      <div class="stat-lbl">Completados</div>
+    </div>
+    <div class="stat s-teal">
+      <div class="stat-num">3h 40m</div>
+      <div class="stat-lbl">Tiempo en callejones</div>
+    </div>
+    <div class="stat s-primary">
+      <div class="stat-num">3</div>
+      <div class="stat-lbl">Asignaturas con callejón</div>
+    </div>
+  </div>
+
+  <!-- Callejones list -->
+  <div class="section-title">🔭 Historial de callejones</div>
+
+  <div class="callejones">
+
+    <!-- 1 — En curso -->
+    <div class="callejon">
+      <div class="callejon-header" onclick="toggleCX(1)">
+        <div class="callejon-stripe" style="background:var(--primary)"></div>
+        <div class="callejon-info">
+          <div class="callejon-subject">Fundamentos de Programación</div>
+          <div class="callejon-name">Refuerzo: Condicionales anidados</div>
+          <div class="callejon-meta">Iniciado hoy · 0/3 ejercicios · ~20 min restantes</div>
+        </div>
+        <span class="callejon-badge badge-in-progress">En curso</span>
+        <span class="callejon-badge badge-type-refuerzo" style="margin-left:6px">Refuerzo</span>
+      </div>
+      <div class="callejon-expand open" id="cx-1">
+        <div class="cx-steps">
+          <div class="cx-step pending"><div class="cx-step-dot"></div><span>Ejercicio 1 — Traza un condicional simple</span></div>
+          <div class="cx-step pending"><div class="cx-step-dot"></div><span>Ejercicio 2 — Condicionales anidados con el agente</span></div>
+          <div class="cx-step pending"><div class="cx-step-dot"></div><span>Ejercicio 3 — Escribe tu propio programa</span></div>
+        </div>
+        <a class="btn btn-primary" href="../estudiante/index.html">Continuar callejón →</a>
+      </div>
+    </div>
+
+    <!-- 2 — Completado -->
+    <div class="callejon">
+      <div class="callejon-header" onclick="toggleCX(2)">
+        <div class="callejon-stripe" style="background:var(--teal)"></div>
+        <div class="callejon-info">
+          <div class="callejon-subject">Fundamentos de Programación</div>
+          <div class="callejon-name">Profundización: Recursividad avanzada</div>
+          <div class="callejon-meta">Completado el 24 ene · 45 min · 3/3 ejercicios</div>
+        </div>
+        <span class="callejon-badge badge-completed">Completado</span>
+        <span class="callejon-badge badge-type-profundizacion" style="margin-left:6px">Profundización</span>
+      </div>
+      <div class="callejon-expand" id="cx-2">
+        <div class="cx-steps">
+          <div class="cx-step done"><div class="cx-step-dot"></div><span>Introducción a la recursividad de cola</span></div>
+          <div class="cx-step done"><div class="cx-step-dot"></div><span>Torres de Hanói con el agente tutor</span></div>
+          <div class="cx-step done"><div class="cx-step-dot"></div><span>Implementa merge sort recursivo</span></div>
+        </div>
+        <div class="cx-insight">
+          <strong>Nota del agente:</strong> Completaste este callejón en menos tiempo de lo estimado y con muy pocas pistas. El agente ha desbloqueado un callejón de nivel superior sobre memoización cuando estés lista.
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 — Completado, Bases de Datos -->
+    <div class="callejon">
+      <div class="callejon-header" onclick="toggleCX(3)">
+        <div class="callejon-stripe" style="background:var(--warn)"></div>
+        <div class="callejon-info">
+          <div class="callejon-subject">Bases de Datos</div>
+          <div class="callejon-name">Refuerzo: Modelo entidad-relación</div>
+          <div class="callejon-meta">Completado el 20 ene · 30 min · 2/2 ejercicios</div>
+        </div>
+        <span class="callejon-badge badge-completed">Completado</span>
+        <span class="callejon-badge badge-type-refuerzo" style="margin-left:6px">Refuerzo</span>
+      </div>
+      <div class="callejon-expand" id="cx-3">
+        <div class="cx-steps">
+          <div class="cx-step done"><div class="cx-step-dot"></div><span>Análisis de un diagrama ER con errores</span></div>
+          <div class="cx-step done"><div class="cx-step-dot"></div><span>Diseña el ER de una biblioteca desde cero</span></div>
+        </div>
+        <div class="cx-insight">
+          <strong>Nota del agente:</strong> Tenías dudas sobre la cardinalidad N:M. Tras el ejercicio, tus respuestas mostraron comprensión sólida. El trabajo de entrega debería resultarte más fluido ahora.
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 — Completado, Matemáticas -->
+    <div class="callejon">
+      <div class="callejon-header" onclick="toggleCX(4)">
+        <div class="callejon-stripe" style="background:var(--accent)"></div>
+        <div class="callejon-info">
+          <div class="callejon-subject">Matemáticas Discretas</div>
+          <div class="callejon-name">Profundización: Teoría de grafos</div>
+          <div class="callejon-meta">Completado el 15 ene · 55 min · 3/3 ejercicios</div>
+        </div>
+        <span class="callejon-badge badge-completed">Completado</span>
+        <span class="callejon-badge badge-type-profundizacion" style="margin-left:6px">Profundización</span>
+      </div>
+      <div class="callejon-expand" id="cx-4">
+        <div class="cx-steps">
+          <div class="cx-step done"><div class="cx-step-dot"></div><span>Conceptos básicos: nodos, aristas, grado</span></div>
+          <div class="cx-step done"><div class="cx-step-dot"></div><span>Algoritmo BFS explicado con el agente</span></div>
+          <div class="cx-step done"><div class="cx-step-dot"></div><span>Aplica DFS a un grafo de dependencias</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="text-align:center">
+    <a href="../home-estudiante/index.html" class="btn btn-muted">← Volver a inicio</a>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+<div class="proto-badge">PROTOTIPO DESECHABLE</div>
+
+<script>
+let toastTimer;
+function showToast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 2800);
+}
+function toggleCX(n) {
+  const el = document.getElementById(`cx-${n}`);
+  el.classList.toggle("open");
+}
+</script>
+</body>
+</html>

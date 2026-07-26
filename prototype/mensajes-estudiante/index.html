@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<!-- PROTOTIPO DESECHABLE — no promover a producción -->
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI2Learn — Mensajes</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f5f4f1; --surface: #ffffff; --border: #e2e0db;
+  --primary: #2563eb; --primary-h: #1d4ed8;
+  --accent: #7c3aed; --accent-bg: #faf5ff;
+  --teal: #0d9488; --teal-bg: #f0fdfa;
+  --warn: #d97706; --warn-bg: #fffbeb;
+  --ok: #16a34a; --ok-bg: #f0fdf4;
+  --muted: #6b7280; --text: #111827;
+  --radius: 10px; --shadow: 0 1px 4px rgba(0,0,0,.08);
+}
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; height: 56px; display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 50; }
+.header-badge { background: #fee2e2; color: #991b1b; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+.header-user { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); margin-left: auto; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--teal); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; }
+.avatar-sm { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; flex-shrink: 0; }
+
+.nav-tabs { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; display: flex; gap: 0; }
+.nav-tab { padding: 12px 18px; font-size: 14px; font-weight: 500; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+.nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+.nav-tab:hover:not(.active) { color: var(--text); }
+
+main { max-width: 720px; margin: 0 auto; padding: 28px 24px 80px; }
+
+.page-title { font-size: 20px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+.unread-badge { background: var(--primary); color: #fff; font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 20px; }
+
+/* Thread list */
+.thread-list { display: flex; flex-direction: column; gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 20px; }
+.thread {
+  background: var(--surface); padding: 14px 18px;
+  display: flex; align-items: flex-start; gap: 14px;
+  cursor: pointer; transition: background .12s;
+}
+.thread:hover { background: #fafaf9; }
+.thread.unread { background: #eff6ff; }
+.thread.unread:hover { background: #dbeafe; }
+.thread-body { flex: 1; min-width: 0; }
+.thread-top { display: flex; align-items: baseline; gap: 8px; margin-bottom: 3px; }
+.thread-from { font-size: 14px; font-weight: 700; }
+.thread.unread .thread-from { color: var(--primary); }
+.thread-subject { font-size: 14px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.thread-time { font-size: 12px; color: var(--muted); margin-left: auto; flex-shrink: 0; }
+.thread-preview { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.thread-tag { font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 20px; }
+.tag-agent { background: var(--accent-bg); color: var(--accent); }
+.tag-prof  { background: var(--ok-bg); color: var(--ok); }
+.tag-info  { background: #f3f4f6; color: var(--muted); }
+
+/* Message panel (simulated open thread) */
+.msg-panel {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--radius); padding: 20px 24px;
+  margin-bottom: 20px;
+}
+.msg-panel-header { display: flex; align-items: flex-start; gap: 14px; padding-bottom: 16px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+.msg-panel-info { flex: 1; }
+.msg-panel-from { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+.msg-panel-subject { font-size: 13px; color: var(--muted); }
+.msg-panel-date { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.msg-body { font-size: 14px; line-height: 1.7; color: var(--text); }
+.msg-body p { margin-bottom: 10px; }
+.msg-body p:last-child { margin-bottom: 0; }
+
+/* Reply box */
+.reply-box { background: #f9fafb; border: 1.5px solid var(--border); border-radius: var(--radius); padding: 16px 18px; margin-bottom: 20px; }
+.reply-box textarea { width: 100%; border: 1.5px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 14px; font-family: inherit; resize: vertical; min-height: 80px; outline: none; }
+.reply-box textarea:focus { border-color: var(--primary); }
+.reply-actions { display: flex; gap: 8px; margin-top: 10px; justify-content: flex-end; }
+
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; text-decoration: none; }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-h); }
+.btn-muted { background: #f3f4f6; color: var(--text); border: 1.5px solid var(--border); }
+.btn-muted:hover { background: #e5e7eb; }
+
+.proto-badge { position: fixed; bottom: 20px; right: 20px; background: #1f2937; color: #fff; font-size: 11px; font-weight: 600; padding: 6px 14px; border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.3); z-index: 100; pointer-events: none; }
+.toast { position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%) translateY(80px); background: #1f2937; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,.3); transition: transform .3s; z-index: 200; }
+.toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../home-estudiante/index.html" style="font-size:13px;color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:4px;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">← Inicio</a>
+  <div class="header-badge">PROTOTIPO</div>
+  <div class="header-user">
+    <div class="avatar">AG</div>
+    <span>Ana García</span>
+  </div>
+</header>
+
+<nav class="nav-tabs">
+  <a class="nav-tab" href="../home-estudiante/index.html">🏠 Inicio</a>
+  <a class="nav-tab" href="../calendario-estudiante/index.html">📅 Calendario</a>
+  <a class="nav-tab active" href="#">💬 Mensajes</a>
+  <a class="nav-tab" href="../mapa-global/index.html">🗺 Mi mapa global</a>
+</nav>
+
+<main>
+
+  <div class="page-title">
+    Mensajes
+    <span class="unread-badge">2 sin leer</span>
+  </div>
+
+  <!-- Thread list -->
+  <div class="thread-list">
+
+    <!-- Thread 1 — agent, unread -->
+    <div class="thread unread" onclick="openThread(1)">
+      <div class="avatar-sm" style="background:var(--accent);color:#fff">🤖</div>
+      <div class="thread-body">
+        <div class="thread-top">
+          <span class="thread-from">Agente de aprendizaje</span>
+          <span class="thread-tag tag-agent">Agente</span>
+          <span class="thread-time">Hoy 09:14</span>
+        </div>
+        <div class="thread-subject">Tienes un callejón de refuerzo listo en Programación</div>
+        <div class="thread-preview">He detectado que el quiz de condicionales te está costando. He preparado un callejón...</div>
+      </div>
+    </div>
+
+    <!-- Thread 2 — professor, unread -->
+    <div class="thread unread" onclick="openThread(2)">
+      <div class="avatar-sm" style="background:var(--primary);color:#fff">SR</div>
+      <div class="thread-body">
+        <div class="thread-top">
+          <span class="thread-from">Prof. Sánchez Ruiz</span>
+          <span class="thread-tag tag-prof">Docente</span>
+          <span class="thread-time">Ayer 17:32</span>
+        </div>
+        <div class="thread-subject">Recordatorio: trabajo ER — plazo miércoles 29</div>
+        <div class="thread-preview">Os recuerdo que el trabajo de diagrama ER tiene fecha límite el miércoles. Si tenéis...</div>
+      </div>
+    </div>
+
+    <!-- Thread 3 — platform info, read -->
+    <div class="thread" onclick="openThread(3)">
+      <div class="avatar-sm" style="background:#6b7280;color:#fff">ℹ️</div>
+      <div class="thread-body">
+        <div class="thread-top">
+          <span class="thread-from">AI2Learn</span>
+          <span class="thread-tag tag-info">Plataforma</span>
+          <span class="thread-time">Lun 27</span>
+        </div>
+        <div class="thread-subject">Tu resumen semanal — semana 5</div>
+        <div class="thread-preview">Esta semana has completado 3 actividades y explorado 2 callejones. Tu progreso...</div>
+      </div>
+    </div>
+
+    <!-- Thread 4 — professor, read -->
+    <div class="thread" onclick="openThread(4)">
+      <div class="avatar-sm" style="background:#16a34a;color:#fff">GA</div>
+      <div class="thread-body">
+        <div class="thread-top">
+          <span class="thread-from">Prof. Gómez Alonso</span>
+          <span class="thread-tag tag-prof">Docente</span>
+          <span class="thread-time">Vie 24</span>
+        </div>
+        <div class="thread-subject">Nueva lección disponible — Lógica proposicional</div>
+        <div class="thread-preview">Ya está disponible la lección de lógica proposicional con los ejercicios interactivos...</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Open thread: message 1 (agent) -->
+  <div class="msg-panel" id="thread-1">
+    <div class="msg-panel-header">
+      <div class="avatar-sm" style="background:var(--accent);color:#fff">🤖</div>
+      <div class="msg-panel-info">
+        <div class="msg-panel-from">Agente de aprendizaje</div>
+        <div class="msg-panel-subject">Tienes un callejón de refuerzo listo en Programación</div>
+        <div class="msg-panel-date">Hoy a las 09:14</div>
+      </div>
+    </div>
+    <div class="msg-body">
+      <p>Hola Ana,</p>
+      <p>He estado revisando tus últimas sesiones en <strong>Fundamentos de Programación</strong> y veo que el mini-quiz de condicionales te está resultando más difícil que los anteriores. Eso es completamente normal: los condicionales anidados son un punto donde muchos estudiantes necesitan un poco más de práctica.</p>
+      <p>He preparado un <strong>callejón de refuerzo</strong> de unos 20 minutos con tres ejercicios guiados que van de menor a mayor dificultad. Al terminar deberías sentirte más segura antes de hacer el quiz oficial.</p>
+      <p>Puedes acceder desde tu asignatura de Fundamentos, o directamente desde <a href="../estudiante/index.html" style="color:var(--primary)">aquí →</a></p>
+    </div>
+  </div>
+
+  <div class="reply-box" id="reply-1">
+    <textarea placeholder="Escribe una respuesta al agente..." onclick="showToast('Respuesta enviada — el agente la procesará en breve')"></textarea>
+    <div class="reply-actions">
+      <button class="btn btn-muted" onclick="showToast('Borrador guardado')">Guardar borrador</button>
+      <button class="btn btn-primary" onclick="showToast('Mensaje enviado')">Enviar</button>
+    </div>
+  </div>
+
+  <div style="text-align:center">
+    <a href="../home-estudiante/index.html" class="btn btn-muted">← Volver a inicio</a>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+<div class="proto-badge">PROTOTIPO DESECHABLE</div>
+
+<script>
+let toastTimer;
+function showToast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 2800);
+}
+function openThread(n) {
+  if (n !== 1) showToast("Abriendo conversación...");
+}
+</script>
+</body>
+</html>

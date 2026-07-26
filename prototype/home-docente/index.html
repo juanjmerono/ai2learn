@@ -256,9 +256,9 @@ main { max-width: 960px; margin: 0 auto; padding: 28px 24px 80px; }
 
 <nav class="nav-tabs">
   <a class="nav-tab active" href="#">🏠 Mis asignaturas</a>
-  <a class="nav-tab" href="#" onclick="showToast('Agenda de clase — pendiente de prototipo'); return false;">📅 Agenda</a>
-  <a class="nav-tab" href="#" onclick="showToast('Conversaciones elevadas — pendiente de prototipo'); return false;">💬 Conversaciones (2)</a>
-  <a class="nav-tab" href="#" onclick="showToast('Analítica global — pendiente de prototipo'); return false;">📊 Analítica global</a>
+  <a class="nav-tab" href="../agenda-docente/index.html">📅 Agenda</a>
+  <a class="nav-tab" href="../conversaciones-docente/index.html">💬 Conversaciones (2)</a>
+  <a class="nav-tab" href="../analitica-docente/index.html">📊 Analítica global</a>
 </nav>
 
 <main>
@@ -396,7 +396,7 @@ main { max-width: 960px; margin: 0 auto; padding: 28px 24px 80px; }
           </div>
         </div>
         <div class="sc-action-col">
-          <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); showToast('Dashboard de POO — pendiente de prototipo')">Abrir dashboard →</button>
+          <a class="btn btn-primary btn-sm" href="../docente/index.html?step=4" onclick="event.stopPropagation()">Abrir dashboard →</a>
           <button class="btn btn-muted btn-sm" onclick="event.stopPropagation(); toggleCard(2)">Ver alertas ▾</button>
         </div>
       </div>
@@ -479,7 +479,7 @@ main { max-width: 960px; margin: 0 auto; padding: 28px 24px 80px; }
           </div>
         </div>
         <div class="sc-action-col">
-          <button class="btn btn-muted btn-sm" onclick="event.stopPropagation(); showToast('Dashboard del Seminario — pendiente de prototipo')">Abrir dashboard</button>
+          <a class="btn btn-muted btn-sm" href="../docente/index.html?step=4" onclick="event.stopPropagation()">Abrir dashboard</a>
         </div>
       </div>
       <div class="sc-expand" id="expand-4">

@@ -1017,10 +1017,14 @@ function showToast(msg) {
 }
 
 /* ═══════════════════════════════════════════════
-   Init
+   Init — soporta ?step=N en la URL para arrancar
+   directamente en un paso específico (p.ej. desde
+   home-docente para dashboards de asignaturas ya
+   publicadas o en revisión).
 ═══════════════════════════════════════════════ */
 openDB();
-goToScreen(1);
+const _urlStep = parseInt(new URLSearchParams(location.search).get("step") || "1", 10);
+goToScreen((_urlStep >= 1 && _urlStep <= 4) ? _urlStep : 1);
 </script>
 </body>
 </html>

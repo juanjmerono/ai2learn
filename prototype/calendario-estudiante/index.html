@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<!-- PROTOTIPO DESECHABLE — no promover a producción -->
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI2Learn — Calendario</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:        #f5f4f1;
+  --surface:   #ffffff;
+  --border:    #e2e0db;
+  --primary:   #2563eb;
+  --primary-h: #1d4ed8;
+  --accent:    #7c3aed;
+  --accent-bg: #faf5ff;
+  --teal:      #0d9488;
+  --teal-bg:   #f0fdfa;
+  --warn:      #d97706;
+  --warn-bg:   #fffbeb;
+  --ok:        #16a34a;
+  --ok-bg:     #f0fdf4;
+  --err:       #dc2626;
+  --muted:     #6b7280;
+  --text:      #111827;
+  --radius:    10px;
+  --shadow:    0 1px 4px rgba(0,0,0,.08);
+}
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+header {
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 0 24px; height: 56px;
+  display: flex; align-items: center; gap: 16px;
+  position: sticky; top: 0; z-index: 50;
+}
+.logo { font-weight: 700; font-size: 18px; color: var(--primary); letter-spacing: -.5px; flex-shrink: 0; }
+.header-badge { background: #fee2e2; color: #991b1b; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+.header-user { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); margin-left: auto; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--teal); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; }
+
+.nav-tabs { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; display: flex; gap: 0; }
+.nav-tab { padding: 12px 18px; font-size: 14px; font-weight: 500; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+.nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+.nav-tab:hover:not(.active) { color: var(--text); }
+
+main { max-width: 960px; margin: 0 auto; padding: 28px 24px 80px; }
+
+/* Week navigator */
+.week-nav { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+.week-nav h2 { font-size: 18px; font-weight: 700; flex: 1; }
+.btn-icon { background: var(--surface); border: 1.5px solid var(--border); border-radius: 8px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; transition: background .14s; }
+.btn-icon:hover { background: #f3f4f6; }
+
+/* Calendar grid */
+.cal-grid { display: grid; grid-template-columns: 70px repeat(5, 1fr); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--surface); margin-bottom: 28px; }
+.cal-header { background: #f9fafb; padding: 8px 10px; font-size: 12px; font-weight: 700; text-align: center; border-bottom: 1px solid var(--border); color: var(--muted); }
+.cal-header.today { color: var(--primary); background: #eff6ff; }
+.cal-time { padding: 12px 10px; font-size: 11px; color: var(--muted); text-align: right; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); min-height: 52px; display: flex; align-items: flex-start; justify-content: flex-end; }
+.cal-cell { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); min-height: 52px; padding: 4px; position: relative; }
+.cal-cell:last-child { border-right: none; }
+
+.cal-event {
+  border-radius: 5px; padding: 3px 6px; font-size: 11px; font-weight: 600; line-height: 1.35;
+  cursor: pointer; transition: opacity .14s;
+}
+.cal-event:hover { opacity: .85; }
+.ev-class   { background: #dbeafe; color: #1e40af; }
+.ev-quiz    { background: #fee2e2; color: #991b1b; }
+.ev-entrega { background: #fef9c3; color: #854d0e; }
+.ev-tutoría { background: #dcfce7; color: #166534; }
+.ev-callejon { background: #f5f3ff; color: #6d28d9; }
+
+/* Deadline cards */
+.deadlines { margin-bottom: 28px; }
+.dl-title { font-size: 17px; font-weight: 700; margin-bottom: 12px; }
+.dl-list { display: flex; flex-direction: column; gap: 8px; }
+.dl-item { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 12px 16px; display: flex; align-items: center; gap: 14px; }
+.dl-item.urgent { border-color: #fca5a5; background: #fff5f5; }
+.dl-item.soon   { border-color: #fde68a; background: var(--warn-bg); }
+.dl-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.dl-content { flex: 1; }
+.dl-subject { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin-bottom: 2px; }
+.dl-name { font-size: 14px; font-weight: 600; }
+.dl-date { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.dl-cta { font-size: 13px; font-weight: 600; color: var(--primary); background: none; border: none; cursor: pointer; padding: 6px 12px; border-radius: 6px; transition: background .14s; text-decoration: none; }
+.dl-cta:hover { background: #eff6ff; }
+
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: background .14s; text-decoration: none; }
+.btn-muted { background: #f3f4f6; color: var(--text); border: 1.5px solid var(--border); }
+.btn-muted:hover { background: #e5e7eb; }
+
+.proto-badge { position: fixed; bottom: 20px; right: 20px; background: #1f2937; color: #fff; font-size: 11px; font-weight: 600; padding: 6px 14px; border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.3); z-index: 100; pointer-events: none; }
+.toast { position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%) translateY(80px); background: #1f2937; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,.3); transition: transform .3s; z-index: 200; }
+.toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../home-estudiante/index.html" style="font-size:13px;color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:4px;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">← Inicio</a>
+  <div class="header-badge">PROTOTIPO</div>
+  <div class="header-user">
+    <div class="avatar">AG</div>
+    <span>Ana García</span>
+  </div>
+</header>
+
+<nav class="nav-tabs">
+  <a class="nav-tab" href="../home-estudiante/index.html">🏠 Inicio</a>
+  <a class="nav-tab active" href="#">📅 Calendario</a>
+  <a class="nav-tab" href="../mensajes-estudiante/index.html">💬 Mensajes</a>
+  <a class="nav-tab" href="../mapa-global/index.html">🗺 Mi mapa global</a>
+</nav>
+
+<main>
+
+  <!-- Week navigator -->
+  <div class="week-nav">
+    <button class="btn-icon" onclick="showToast('Semana anterior')">‹</button>
+    <h2>Semana 6 · 27 ene – 31 ene 2025</h2>
+    <button class="btn-icon" onclick="showToast('Semana siguiente')">›</button>
+  </div>
+
+  <!-- Calendar grid (Mon–Fri, 9h–18h in slots) -->
+  <div class="cal-grid">
+    <!-- Headers -->
+    <div class="cal-header"></div>
+    <div class="cal-header">LUN 27</div>
+    <div class="cal-header today">MAR 28</div>
+    <div class="cal-header">MIÉ 29</div>
+    <div class="cal-header">JUE 30</div>
+    <div class="cal-header">VIE 31</div>
+
+    <!-- 9:00 -->
+    <div class="cal-time">9:00</div>
+    <div class="cal-cell"><div class="cal-event ev-class" onclick="showToast('Fundamentos de Programación — Aula 204')">📚 Fund. Prog.<br>9:00–11:00</div></div>
+    <div class="cal-cell"></div>
+    <div class="cal-cell"><div class="cal-event ev-class" onclick="showToast('Matemáticas Discretas — Aula 101')">📐 Mat. Discretas<br>9:00–11:00</div></div>
+    <div class="cal-cell"></div>
+    <div class="cal-cell"><div class="cal-event ev-class" onclick="showToast('Inglés Técnico — Aula 305')">🇬🇧 Inglés Técnico<br>9:00–10:00</div></div>
+
+    <!-- 11:00 -->
+    <div class="cal-time">11:00</div>
+    <div class="cal-cell"></div>
+    <div class="cal-cell"><div class="cal-event ev-quiz" onclick="showToast('Mini-quiz: Condicionales — pendiente de hacer')">⚡ Quiz Condicionales<br>11:00–11:30</div></div>
+    <div class="cal-cell"></div>
+    <div class="cal-cell"><div class="cal-event ev-class" onclick="showToast('Bases de Datos — Aula 207')">🗄 Bases de Datos<br>11:00–13:00</div></div>
+    <div class="cal-cell"></div>
+
+    <!-- 13:00 -->
+    <div class="cal-time">13:00</div>
+    <div class="cal-cell"></div>
+    <div class="cal-cell"></div>
+    <div class="cal-cell"></div>
+    <div class="cal-cell"></div>
+    <div class="cal-cell"></div>
+
+    <!-- 15:00 -->
+    <div class="cal-time">15:00</div>
+    <div class="cal-cell"><div class="cal-event ev-callejon" onclick="showToast('Callejón de profundización — Recursividad')">🔭 Callejón Recursividad<br>15:00–16:00</div></div>
+    <div class="cal-cell"></div>
+    <div class="cal-cell"><div class="cal-event ev-entrega" onclick="showToast('Entrega trabajo ER — Bases de Datos')">📋 Entrega ER-BBDD<br>Plazo 29 ene</div></div>
+    <div class="cal-cell"><div class="cal-event ev-tutoría" onclick="showToast('Tutoría opcional Prof. Sánchez')">🙋 Tutoría BBDD<br>15:00–16:00</div></div>
+    <div class="cal-cell"></div>
+
+    <!-- 17:00 -->
+    <div class="cal-time">17:00</div>
+    <div class="cal-cell"></div>
+    <div class="cal-cell"></div>
+    <div class="cal-cell"></div>
+    <div class="cal-cell"></div>
+    <div class="cal-cell"></div>
+  </div>
+
+  <!-- Upcoming deadlines -->
+  <div class="deadlines">
+    <div class="dl-title">Próximos plazos</div>
+    <div class="dl-list">
+      <div class="dl-item urgent">
+        <div class="dl-dot" style="background:var(--err)"></div>
+        <div class="dl-content">
+          <div class="dl-subject">Bases de Datos</div>
+          <div class="dl-name">Entrega trabajo diagrama ER</div>
+          <div class="dl-date">Miércoles 29 ene · en 1 día · 2 de 3 secciones sin completar</div>
+        </div>
+        <a class="dl-cta" href="../estudiante/index.html">Ver →</a>
+      </div>
+      <div class="dl-item soon">
+        <div class="dl-dot" style="background:var(--warn)"></div>
+        <div class="dl-content">
+          <div class="dl-subject">Fundamentos de Programación</div>
+          <div class="dl-name">Mini-quiz: Condicionales (autoevaluación)</div>
+          <div class="dl-date">Martes 28 ene · hoy · desbloquea los siguientes ejercicios</div>
+        </div>
+        <a class="dl-cta" href="../estudiante/index.html">Hacer →</a>
+      </div>
+      <div class="dl-item">
+        <div class="dl-dot" style="background:var(--primary)"></div>
+        <div class="dl-content">
+          <div class="dl-subject">Matemáticas Discretas</div>
+          <div class="dl-name">Lección: Lógica proposicional</div>
+          <div class="dl-date">Sin plazo fijo · siguiente bloque en tu camino</div>
+        </div>
+        <button class="dl-cta" onclick="showToast('Abriendo lección de Matemáticas...')">Ver →</button>
+      </div>
+      <div class="dl-item">
+        <div class="dl-dot" style="background:var(--teal)"></div>
+        <div class="dl-content">
+          <div class="dl-subject">Inglés Técnico</div>
+          <div class="dl-name">Reading: Technical Specifications</div>
+          <div class="dl-date">Sin plazo fijo · ~15 min</div>
+        </div>
+        <button class="dl-cta" onclick="showToast('Abriendo lectura de Inglés...')">Ver →</button>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align:center">
+    <a href="../home-estudiante/index.html" class="btn btn-muted">← Volver a inicio</a>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+<div class="proto-badge">PROTOTIPO DESECHABLE</div>
+
+<script>
+let toastTimer;
+function showToast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 2800);
+}
+</script>
+</body>
+</html>

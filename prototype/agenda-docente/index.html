@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<!-- PROTOTIPO DESECHABLE — no promover a producción -->
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI2Learn — Agenda docente</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f5f4f1; --surface: #ffffff; --border: #e2e0db;
+  --primary: #2563eb; --primary-h: #1d4ed8;
+  --accent: #7c3aed; --accent-bg: #faf5ff;
+  --teal: #0d9488; --teal-bg: #f0fdfa;
+  --warn: #d97706; --warn-bg: #fffbeb;
+  --ok: #16a34a; --ok-bg: #f0fdf4;
+  --err: #dc2626;
+  --muted: #6b7280; --text: #111827;
+  --radius: 10px; --shadow: 0 1px 4px rgba(0,0,0,.08);
+}
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; height: 56px; display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 50; }
+.header-badge { background: #fee2e2; color: #991b1b; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+.header-user { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); margin-left: auto; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; }
+
+.nav-tabs { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; display: flex; gap: 0; }
+.nav-tab { padding: 12px 18px; font-size: 14px; font-weight: 500; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+.nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+.nav-tab:hover:not(.active) { color: var(--text); }
+
+main { max-width: 960px; margin: 0 auto; padding: 28px 24px 80px; }
+
+/* Week nav */
+.week-nav { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+.week-nav h2 { font-size: 18px; font-weight: 700; flex: 1; }
+.btn-icon { background: var(--surface); border: 1.5px solid var(--border); border-radius: 8px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; }
+.btn-icon:hover { background: #f3f4f6; }
+
+/* Day columns layout */
+.agenda-cols { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 28px; }
+.day-col { display: flex; flex-direction: column; gap: 8px; }
+.day-header { font-size: 12px; font-weight: 700; text-align: center; color: var(--muted); padding: 6px 4px; background: #f9fafb; border-radius: 6px; }
+.day-header.today { color: var(--primary); background: #eff6ff; }
+
+.agenda-event {
+  border-radius: 8px; padding: 8px 10px;
+  font-size: 12px; line-height: 1.4;
+  cursor: pointer; transition: opacity .12s;
+}
+.agenda-event:hover { opacity: .85; }
+.ev-clase      { background: #dbeafe; color: #1e40af; border-left: 3px solid #2563eb; }
+.ev-tutoria    { background: var(--ok-bg); color: #166534; border-left: 3px solid var(--ok); }
+.ev-corrección { background: var(--warn-bg); color: #854d0e; border-left: 3px solid var(--warn); }
+.ev-reunion    { background: #f5f3ff; color: #6d28d9; border-left: 3px solid #7c3aed; }
+.ev-prep       { background: #f3f4f6; color: var(--muted); border-left: 3px solid var(--border); }
+
+.ev-time { font-size: 10px; font-weight: 700; margin-bottom: 2px; opacity: .8; }
+.ev-name { font-weight: 700; }
+.ev-sub  { font-size: 11px; opacity: .8; }
+
+/* AI suggestions */
+.agent-box {
+  background: linear-gradient(135deg, #fffbeb 0%, #faf5ff 100%);
+  border: 1.5px solid #fde68a;
+  border-radius: var(--radius); padding: 16px 20px;
+  display: flex; gap: 14px; align-items: flex-start;
+  margin-bottom: 28px;
+}
+.agent-icon { font-size: 26px; flex-shrink: 0; }
+.agent-body { flex: 1; }
+.agent-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--warn); margin-bottom: 6px; }
+.agent-body p { font-size: 14px; line-height: 1.6; }
+.agent-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; text-decoration: none; }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-h); }
+.btn-muted { background: #f3f4f6; color: var(--text); border: 1.5px solid var(--border); }
+.btn-muted:hover { background: #e5e7eb; }
+.btn-sm { padding: 5px 11px; font-size: 12px; }
+
+.proto-badge { position: fixed; bottom: 20px; right: 20px; background: #1f2937; color: #fff; font-size: 11px; font-weight: 600; padding: 6px 14px; border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.3); z-index: 100; pointer-events: none; }
+.toast { position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%) translateY(80px); background: #1f2937; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,.3); transition: transform .3s; z-index: 200; }
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+@media (max-width: 640px) { .agenda-cols { grid-template-columns: repeat(2, 1fr); } }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../home-docente/index.html" style="font-size:13px;color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:4px;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">← Inicio</a>
+  <div class="header-badge">PROTOTIPO</div>
+  <div class="header-user">
+    <div class="avatar">MG</div>
+    <span>Prof. Martínez García</span>
+  </div>
+</header>
+
+<nav class="nav-tabs">
+  <a class="nav-tab" href="../home-docente/index.html">🏠 Mis asignaturas</a>
+  <a class="nav-tab active" href="#">📅 Agenda</a>
+  <a class="nav-tab" href="../conversaciones-docente/index.html">💬 Conversaciones (2)</a>
+  <a class="nav-tab" href="../analitica-docente/index.html">📊 Analítica global</a>
+</nav>
+
+<main>
+
+  <!-- Week nav -->
+  <div class="week-nav">
+    <button class="btn-icon" onclick="showToast('Semana anterior')">‹</button>
+    <h2>Semana 6 · 27 ene – 31 ene 2025</h2>
+    <button class="btn-icon" onclick="showToast('Semana siguiente')">›</button>
+  </div>
+
+  <!-- Agent box -->
+  <div class="agent-box">
+    <div class="agent-icon">🤖</div>
+    <div class="agent-body">
+      <div class="agent-label">Agente — sugerencia para esta semana</div>
+      <p>Esta semana tienes el quiz de <strong>Módulo 3 (Bucles)</strong> en Fundamentos el miércoles. El agente sugiere añadir 10 minutos de repaso de recursividad al inicio de la clase del lunes, ya que el 38% de la clase tiene dificultades en ese punto concreto.</p>
+      <div class="agent-actions">
+        <button class="btn btn-primary btn-sm" onclick="showToast('Repaso añadido al inicio de la clase del lunes')">Añadir repaso al lunes</button>
+        <button class="btn btn-muted btn-sm" onclick="showToast('Sugerencia descartada')">Descartar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Agenda columns -->
+  <div class="agenda-cols">
+
+    <!-- Lunes 27 -->
+    <div class="day-col">
+      <div class="day-header">LUN 27</div>
+      <div class="agenda-event ev-clase" onclick="showToast('Fundamentos de Programación — Aula 204 · 25 estudiantes')">
+        <div class="ev-time">9:00–11:00</div>
+        <div class="ev-name">Fund. Programación</div>
+        <div class="ev-sub">Módulo 2 — Condicionales · Aula 204</div>
+      </div>
+      <div class="agenda-event ev-prep" onclick="showToast('Tiempo de preparación reservado')">
+        <div class="ev-time">15:00–16:00</div>
+        <div class="ev-name">Preparación</div>
+        <div class="ev-sub">Corrección quizzes semana 5</div>
+      </div>
+    </div>
+
+    <!-- Martes 28 -->
+    <div class="day-col">
+      <div class="day-header today">MAR 28</div>
+      <div class="agenda-event ev-clase" onclick="showToast('POO — Aula 301 · 23 estudiantes')">
+        <div class="ev-time">10:00–12:00</div>
+        <div class="ev-name">POO</div>
+        <div class="ev-sub">Módulo 4 — Herencia · Aula 301</div>
+      </div>
+      <div class="agenda-event ev-tutoria" onclick="showToast('Hora de tutoría abierta — 0/4 solicitudes recibidas')">
+        <div class="ev-time">16:00–17:00</div>
+        <div class="ev-name">Tutoría abierta</div>
+        <div class="ev-sub">Despacho B-204</div>
+      </div>
+    </div>
+
+    <!-- Miércoles 29 -->
+    <div class="day-col">
+      <div class="day-header">MIÉ 29</div>
+      <div class="agenda-event ev-clase" onclick="showToast('Fundamentos de Programación — Aula 204')">
+        <div class="ev-time">9:00–11:00</div>
+        <div class="ev-name">Fund. Programación</div>
+        <div class="ev-sub">Quiz Módulo 3 + corrección grupal</div>
+      </div>
+      <div class="agenda-event ev-corrección" onclick="showToast('Plazo de entrega de los trabajos ER de BBDD')">
+        <div class="ev-time">23:59</div>
+        <div class="ev-name">Plazo entrega</div>
+        <div class="ev-sub">Trabajo ER — Bases de Datos</div>
+      </div>
+    </div>
+
+    <!-- Jueves 30 -->
+    <div class="day-col">
+      <div class="day-header">JUE 30</div>
+      <div class="agenda-event ev-clase" onclick="showToast('Seminario IA — Sala 110 · 12 estudiantes')">
+        <div class="ev-time">11:00–13:00</div>
+        <div class="ev-name">Seminario IA</div>
+        <div class="ev-sub">Sesión 6 — Casos de uso reales</div>
+      </div>
+      <div class="agenda-event ev-reunion" onclick="showToast('Reunión de departamento — Sala de juntas')">
+        <div class="ev-time">15:30–16:30</div>
+        <div class="ev-name">Reunión depto.</div>
+        <div class="ev-sub">Revisión del cuatrimestre</div>
+      </div>
+    </div>
+
+    <!-- Viernes 31 -->
+    <div class="day-col">
+      <div class="day-header">VIE 31</div>
+      <div class="agenda-event ev-clase" onclick="showToast('POO — Aula 301')">
+        <div class="ev-time">10:00–12:00</div>
+        <div class="ev-name">POO</div>
+        <div class="ev-sub">Módulo 4 — Ejercicios en clase</div>
+      </div>
+      <div class="agenda-event ev-prep" onclick="showToast('Preparación semana 7')">
+        <div class="ev-time">16:00–17:30</div>
+        <div class="ev-name">Preparación</div>
+        <div class="ev-sub">Módulo 3 — Bucles · materiales semana 7</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="text-align:center">
+    <a href="../home-docente/index.html" class="btn btn-muted">← Volver a mis asignaturas</a>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+<div class="proto-badge">PROTOTIPO DESECHABLE</div>
+
+<script>
+let toastTimer;
+function showToast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 2800);
+}
+</script>
+</body>
+</html>

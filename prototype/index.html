@@ -233,9 +233,9 @@ footer {
 
 <div class="hero">
   <h1>Un LMS pensado<br><span>desde la IA</span></h1>
-  <p>Dos prototipos navegables para validar con personas reales si la propuesta de valor tiene sentido — antes de construir nada en producción.</p>
+  <p>Dos puntos de entrada navegables — uno por rol — para validar con personas reales si la propuesta de valor tiene sentido antes de construir nada en producción.</p>
   <div class="context">
-    <strong>Contexto:</strong> estos prototipos son HTML estático sin dependencias externas. Usan IndexedDB para persistir el estado entre recargas. Las respuestas del agente son simuladas para centrar la evaluación en el flujo y la propuesta de valor, no en la IA real.
+    <strong>Contexto:</strong> HTML estático sin dependencias externas. IndexedDB persiste el estado entre recargas. Las respuestas del agente son simuladas para centrar la evaluación en el flujo y la propuesta de valor, no en la IA real. Desde cada inicio se puede acceder al resto del prototipo completo.
   </div>
 </div>
 
@@ -261,130 +261,63 @@ footer {
 
 <div class="question-banner">
   <div class="q-label">Preguntas que responden estos prototipos</div>
+
+  <p style="font-weight:700;margin-bottom:6px">🧑‍🏫 Docente — empieza en «Inicio docente»</p>
+  <p style="margin-bottom:14px">
+    ¿De un vistazo sé qué asignatura necesita mi atención hoy, sin entrar en cada una?<br>
+    ¿El agente me dice qué hacer, o tengo que interpretar los datos yo solo?<br>
+    ¿Puedo actuar directamente desde las alertas o tengo que navegar hasta el problema?<br>
+    ¿Siento que tengo más control sobre mis clases, o más ruido?<br>
+    ¿El flujo de crear una asignatura nueva desde cero me genera confianza o incertidumbre?
+  </p>
+
+  <p style="font-weight:700;margin-bottom:6px">🎓 Estudiante — empieza en «Inicio estudiante»</p>
   <p>
-    <strong>Docente (asignatura):</strong> ¿siento que gano control sobre mi asignatura y libero tiempo gracias al agente?<br>
-    <strong>Estudiante (asignatura):</strong> ¿veo que el sistema me aporta valor real frente a un LMS tradicional?<br>
-    <strong>Inicio docente:</strong> ¿puedo gestionar varias asignaturas sin perder el hilo de ninguna?<br>
-    <strong>Inicio estudiante:</strong> ¿sé qué tengo que hacer hoy sin tener que entrar en cada asignatura?
+    ¿Sé qué tengo que hacer hoy sin tener que entrar en cada asignatura por separado?<br>
+    ¿Cuando el agente me propone un callejón, siento que me ayuda o que me está señalando que he fallado?<br>
+    ¿El mapa global de callejones me hace sentir que progreso, o es otra lista de tareas más?<br>
+    ¿El sistema me parece más útil que un LMS tradicional, o es solo distinto?<br>
+    ¿Confío en que mis conversaciones con el agente son privadas y el profesor no las ve?
   </p>
 </div>
 
 <div class="cards">
 
-  <!-- ── DOCENTE ── -->
-  <div class="proto-card docente">
-    <div class="card-stripe docente"></div>
-    <div class="card-body">
-      <div class="card-role docente">Prototipo 1 — Docente</div>
-      <span class="card-icon">🧑‍🏫</span>
-      <h2>Agente instructional designer + dashboard</h2>
-      <div class="question">
-        "El agente me ahorra horas de diseño pero sigo controlando qué se crea. Sé exactamente dónde están mis estudiantes sin corregir nada."
-      </div>
-      <ul class="flow-list">
-        <li class="flow-item">
-          <div class="flow-num">1</div>
-          <span>Aportas material (PDF, guía docente, URLs) como punto de entrada único</span>
-        </li>
-        <li class="flow-item">
-          <div class="flow-num">2</div>
-          <span>Conversación iterativa con el agente: refinas la propuesta con lenguaje natural</span>
-        </li>
-        <li class="flow-item">
-          <div class="flow-num">3</div>
-          <span>Revisas y editas los módulos — con referencias al material original siempre visibles</span>
-        </li>
-        <li class="flow-item">
-          <div class="flow-num">4</div>
-          <span>Dashboard activo: alertas accionables, sugerencias del agente, estado de la clase</span>
-        </li>
-      </ul>
-      <div class="aha-box">
-        <div class="aha-label">Aha moments</div>
-        Creación de asignatura: "el agente me propone la estructura, yo decido qué queda" · Dashboard: "sé qué hacer sin haber corregido nada"
-      </div>
-    </div>
-    <div class="card-footer">
-      <a class="btn btn-docente" href="docente/index.html">Abrir prototipo del docente →</a>
-    </div>
-  </div>
-
-  <!-- ── ESTUDIANTE ── -->
-  <div class="proto-card estudiante">
-    <div class="card-stripe estudiante"></div>
-    <div class="card-body">
-      <div class="card-role estudiante">Prototipo 2 — Estudiante</div>
-      <span class="card-icon">🎓</span>
-      <h2>Camino estándar con callejones personalizados</h2>
-      <div class="question">
-        "El sistema no me dice que he fallado — me ayuda a entender por qué. Y tengo un mapa propio de lo que he explorado."
-      </div>
-      <ul class="flow-list">
-        <li class="flow-item">
-          <div class="flow-num">1</div>
-          <span>Camino estándar como autopista, con rating anónimo de otros estudiantes</span>
-        </li>
-        <li class="flow-item">
-          <div class="flow-num">2</div>
-          <span>Mini-quiz con retroalimentación inmediata por pregunta</span>
-        </li>
-        <li class="flow-item">
-          <div class="flow-num">3</div>
-          <span>El agente propone un callejón personalizado según resultado — invitación, no imposición</span>
-        </li>
-        <li class="flow-item">
-          <div class="flow-num">4</div>
-          <span>Conversación con el agente tutor + ejercicio práctico en el callejón de refuerzo</span>
-        </li>
-      </ul>
-      <div class="aha-box" style="background:#f0fdfa;border-color:#99f6e4">
-        <div class="aha-label" style="color:var(--teal)">Aha moment</div>
-        Callejón de refuerzo completo: fallas → el agente te explica desde otro ángulo → resuelves un ejercicio → vuelves al camino. Además: mapa personal de exploración acumulado.
-      </div>
-      <div style="margin-top:12px;font-size:12px;color:var(--muted)">
-        💡 Usa el selector de perfil (Ana / Carlos) para ver callejones diferentes según el resultado del quiz.
-      </div>
-    </div>
-    <div class="card-footer">
-      <a class="btn btn-estudiante" href="estudiante/index.html">Abrir prototipo del estudiante →</a>
-    </div>
-  </div>
-
   <!-- ── HOME DOCENTE ── -->
   <div class="proto-card home-d">
     <div class="card-stripe home-d"></div>
     <div class="card-body">
-      <div class="card-role home-d">Prototipo 3 — Punto de entrada · Docente</div>
+      <div class="card-role home-d">Rol — Docente</div>
       <span class="card-icon">🏫</span>
-      <h2>Dashboard multi-asignatura del docente</h2>
+      <h2>Inicio del docente</h2>
       <div class="question">
         "Imparto 4 asignaturas. Necesito saber de un vistazo qué requiere mi atención ahora, sin entrar en cada una."
       </div>
       <ul class="flow-list">
         <li class="flow-item">
           <div class="flow-num">1</div>
-          <span>Vista unificada de todas las asignaturas con estado y alertas activas</span>
+          <span>Vista unificada de asignaturas con estado y alertas activas del agente</span>
         </li>
         <li class="flow-item">
           <div class="flow-num">2</div>
-          <span>El agente resume las alertas del día cruzando todas las asignaturas</span>
+          <span>Agenda semanal de clases, tutorías y plazos con sugerencias proactivas</span>
         </li>
         <li class="flow-item">
           <div class="flow-num">3</div>
-          <span>Expansión en tarjeta por asignatura con alertas accionables</span>
+          <span>Conversaciones que el agente ha elevado al docente (bloqueos y decisiones)</span>
         </li>
         <li class="flow-item">
           <div class="flow-num">4</div>
-          <span>Entrada directa al dashboard detallado de cada asignatura</span>
+          <span>Analítica global del cuatrimestre: progreso, riesgo y uso de callejones</span>
         </li>
       </ul>
       <div class="aha-box">
-        <div class="aha-label">Conecta con</div>
-        Desde aquí se puede entrar al prototipo del docente (asignatura individual) directamente.
+        <div class="aha-label">Desde aquí también puedes</div>
+        Entrar al dashboard detallado de cada asignatura · Crear una nueva asignatura con el agente (botón "+ Nueva asignatura")
       </div>
     </div>
     <div class="card-footer">
-      <a class="btn btn-home-d" href="home-docente/index.html">Abrir inicio del docente →</a>
+      <a class="btn btn-home-d" href="home-docente/index.html">Empezar como docente →</a>
     </div>
   </div>
 
@@ -392,37 +325,37 @@ footer {
   <div class="proto-card home-e">
     <div class="card-stripe home-e"></div>
     <div class="card-body">
-      <div class="card-role home-e">Prototipo 4 — Punto de entrada · Estudiante</div>
+      <div class="card-role home-e">Rol — Estudiante</div>
       <span class="card-icon">🎒</span>
-      <h2>Dashboard multi-asignatura del estudiante</h2>
+      <h2>Inicio del estudiante</h2>
       <div class="question">
         "Tengo 4 asignaturas a la vez. Quiero saber qué tengo pendiente hoy sin entrar en cada una por separado."
       </div>
       <ul class="flow-list">
         <li class="flow-item">
           <div class="flow-num">1</div>
-          <span>El agente resume prioridades del día cruzando todas las asignaturas</span>
+          <span>El agente resume las prioridades del día cruzando todas las asignaturas</span>
         </li>
         <li class="flow-item">
           <div class="flow-num">2</div>
-          <span>Tarjetas de asignatura con progreso, próxima actividad y callejones disponibles</span>
+          <span>Calendario semanal con clases, quizzes y plazos de entrega</span>
         </li>
         <li class="flow-item">
           <div class="flow-num">3</div>
-          <span>Lista de actividades pendientes ordenadas por urgencia</span>
+          <span>Mensajes del agente y del profesor en una bandeja unificada</span>
         </li>
         <li class="flow-item">
           <div class="flow-num">4</div>
-          <span>Entrada directa a la asignatura activa (conecta con el prototipo del estudiante)</span>
+          <span>Mapa global de callejones explorados — historial personal de aprendizaje</span>
         </li>
       </ul>
       <div class="aha-box" style="background:#faf5ff;border-color:#ddd6fe">
-        <div class="aha-label" style="color:var(--accent)">Conecta con</div>
-        Desde "Fundamentos de Programación" se entra directamente al prototipo del estudiante (asignatura individual).
+        <div class="aha-label" style="color:var(--accent)">Desde aquí también puedes</div>
+        Entrar a la sesión de aprendizaje de Fundamentos de Programación · Ver un callejón de refuerzo completo (quiz → agente → ejercicio → vuelta al camino)
       </div>
     </div>
     <div class="card-footer">
-      <a class="btn btn-home-e" href="home-estudiante/index.html">Abrir inicio del estudiante →</a>
+      <a class="btn btn-home-e" href="home-estudiante/index.html">Empezar como estudiante →</a>
     </div>
   </div>
 
@@ -434,19 +367,19 @@ footer {
   <div class="how-steps">
     <div class="how-step">
       <div class="how-step-icon">🎯</div>
-      <div><strong>Fija la pregunta antes de empezar.</strong> Para el docente: "¿sientes que el agente te libera tiempo o te añade trabajo?". Para el estudiante: "¿entiendes mejor por qué has fallado que con un LMS normal?"</div>
+      <div><strong>Fija una pregunta antes de empezar.</strong> Escoge una de las preguntas del bloque de arriba. Una sola por sesión es suficiente — no intentes validarlo todo a la vez.</div>
     </div>
     <div class="how-step">
       <div class="how-step-icon">🤫</div>
-      <div><strong>No expliques nada antes de que lo naveguen.</strong> Observa dónde se detienen, qué leen, qué ignoran. Los silencios son datos.</div>
+      <div><strong>No expliques nada antes de que lo naveguen.</strong> Observa dónde se detienen, qué leen, qué ignoran. Los silencios y los clics erróneos son datos.</div>
     </div>
     <div class="how-step">
       <div class="how-step-icon">📝</div>
-      <div><strong>Recoge reacciones en voz alta.</strong> Pide que piensen en voz alta mientras navegan. Anota las frases exactas, no tu interpretación.</div>
+      <div><strong>Pide que piensen en voz alta.</strong> Anota las frases exactas de la persona, no tu interpretación. "No entiendo para qué sirve esto" vale más que "le costó entender la sección X".</div>
     </div>
     <div class="how-step">
-      <div class="how-step-icon">🔄</div>
-      <div><strong>Cambia el perfil del estudiante</strong> (Ana / Carlos) para mostrar que los callejones son personalizados, no el mismo contenido para todos.</div>
+      <div class="how-step-icon">🔗</div>
+      <div><strong>Todo el prototipo está conectado.</strong> Desde el inicio del docente puedes llegar al flujo de creación de asignatura ("+ Nueva asignatura") y al dashboard activo de cada asignatura. Desde el inicio del estudiante puedes llegar a la sesión de aprendizaje, el calendario, los mensajes y el mapa global de callejones.</div>
     </div>
   </div>
 </div>

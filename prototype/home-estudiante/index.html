@@ -273,9 +273,9 @@ main { max-width: 960px; margin: 0 auto; padding: 28px 24px 80px; }
 
 <nav class="nav-tabs">
   <a class="nav-tab active" href="#">🏠 Inicio</a>
-  <a class="nav-tab" href="#" onclick="showToast('Vista de calendario — pendiente de prototipo'); return false;">📅 Calendario</a>
-  <a class="nav-tab" href="#" onclick="showToast('Mensajes — pendiente de prototipo'); return false;">💬 Mensajes</a>
-  <a class="nav-tab" href="#" onclick="showToast('Tu historial de exploración — pendiente de prototipo'); return false;">🗺 Mi mapa global</a>
+  <a class="nav-tab" href="../calendario-estudiante/index.html">📅 Calendario</a>
+  <a class="nav-tab" href="../mensajes-estudiante/index.html">💬 Mensajes</a>
+  <a class="nav-tab" href="../mapa-global/index.html">🗺 Mi mapa global</a>
 </nav>
 
 <main>
@@ -288,7 +288,7 @@ main { max-width: 960px; margin: 0 auto; padding: 28px 24px 80px; }
       <p>Tienes un quiz pendiente en <strong>Fundamentos de Programación</strong> y el plazo del trabajo de <strong>Bases de Datos</strong> es en 3 días. Te sugiero priorizar el trabajo hoy.</p>
       <div class="as-actions">
         <a class="btn btn-primary" href="../estudiante/index.html">Ir al quiz →</a>
-        <button class="btn btn-ghost" onclick="showToast('Vista del trabajo de BBDD — pendiente de prototipo')">Ver trabajo de BBDD</button>
+        <a class="btn btn-ghost" href="../estudiante/index.html">Ver trabajo de BBDD</a>
         <button class="btn btn-muted" onclick="this.closest('.agent-strip').style.display='none'">Descartar</button>
       </div>
     </div>
@@ -332,7 +332,7 @@ main { max-width: 960px; margin: 0 auto; padding: 28px 24px 80px; }
         <div class="ai-title">Entrega: Trabajo ER — Bases de Datos</div>
         <div class="ai-sub">Plazo: en 3 días · Entregado 0 de 3 secciones</div>
       </div>
-      <button class="ai-action" onclick="showToast('Prototipo de BBDD — pendiente')">Ver →</button>
+      <a class="ai-action" href="../estudiante/index.html">Ver →</a>
     </div>
     <div class="activity-item">
       <div class="ai-dot" style="background:var(--primary)"></div>
@@ -340,14 +340,14 @@ main { max-width: 960px; margin: 0 auto; padding: 28px 24px 80px; }
         <div class="ai-title">Lección: Lógica proposicional — Matemáticas Discretas</div>
         <div class="ai-sub">Siguiente bloque en tu camino estándar · ~20 min</div>
       </div>
-      <button class="ai-action" onclick="showToast('Prototipo de Matemáticas — pendiente')">Ver →</button>
+      <a class="ai-action" href="../estudiante/index.html">Ver →</a>
     </div>
   </div>
 
   <!-- Subjects -->
   <div class="section-head">
     <h2>Tus asignaturas</h2>
-    <a href="#" onclick="showToast('Vista de todas las asignaturas del cuatrimestre'); return false;">Ver todas</a>
+    <a href="../calendario-estudiante/index.html">Ver todas</a>
   </div>
   <div class="subjects-grid">
 
@@ -378,7 +378,7 @@ main { max-width: 960px; margin: 0 auto; padding: 28px 24px 80px; }
     </a>
 
     <!-- Bases de Datos -->
-    <div class="subject-card" onclick="showToast('Prototipo de Bases de Datos — pendiente de crear')">
+    <a class="subject-card" href="../estudiante/index.html">
       <div class="sc-stripe" style="background:var(--warn)"></div>
       <div class="sc-body">
         <div class="sc-meta">
@@ -400,10 +400,10 @@ main { max-width: 960px; margin: 0 auto; padding: 28px 24px 80px; }
         <div class="sc-last">Hace 2 días</div>
         <div class="sc-cta">Ver →</div>
       </div>
-    </div>
+    </a>
 
     <!-- Matemáticas Discretas -->
-    <div class="subject-card" onclick="showToast('Prototipo de Matemáticas — pendiente de crear')">
+    <a class="subject-card" href="../estudiante/index.html">
       <div class="sc-stripe" style="background:var(--accent)"></div>
       <div class="sc-body">
         <div class="sc-meta">
@@ -426,10 +426,10 @@ main { max-width: 960px; margin: 0 auto; padding: 28px 24px 80px; }
         <div class="sc-last">Hace 1 día</div>
         <div class="sc-cta">Continuar →</div>
       </div>
-    </div>
+    </a>
 
     <!-- Inglés Técnico -->
-    <div class="subject-card" onclick="showToast('Prototipo de Inglés Técnico — pendiente de crear')">
+    <a class="subject-card" href="../estudiante/index.html">
       <div class="sc-stripe" style="background:var(--teal)"></div>
       <div class="sc-body">
         <div class="sc-meta">
@@ -451,7 +451,7 @@ main { max-width: 960px; margin: 0 auto; padding: 28px 24px 80px; }
         <div class="sc-last">Hace 3 días</div>
         <div class="sc-cta">Continuar →</div>
       </div>
-    </div>
+    </a>
 
   </div>
 

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<!-- PROTOTIPO DESECHABLE — no promover a producción -->
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI2Learn — Conversaciones elevadas</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f5f4f1; --surface: #ffffff; --border: #e2e0db;
+  --primary: #2563eb; --primary-h: #1d4ed8;
+  --accent: #7c3aed; --accent-bg: #faf5ff;
+  --teal: #0d9488; --teal-bg: #f0fdfa;
+  --warn: #d97706; --warn-bg: #fffbeb;
+  --ok: #16a34a; --ok-bg: #f0fdf4;
+  --err: #dc2626;
+  --muted: #6b7280; --text: #111827;
+  --radius: 10px; --shadow: 0 1px 4px rgba(0,0,0,.08);
+}
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; height: 56px; display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 50; }
+.header-badge { background: #fee2e2; color: #991b1b; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+.header-user { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); margin-left: auto; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; }
+
+.nav-tabs { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; display: flex; gap: 0; }
+.nav-tab { padding: 12px 18px; font-size: 14px; font-weight: 500; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+.nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+.nav-tab:hover:not(.active) { color: var(--text); }
+
+main { max-width: 800px; margin: 0 auto; padding: 28px 24px 80px; }
+
+.page-header { margin-bottom: 24px; }
+.page-header h1 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+.page-header p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+/* Privacy notice */
+.privacy-notice {
+  background: var(--teal-bg); border: 1.5px solid #99f6e4;
+  border-radius: var(--radius); padding: 12px 16px;
+  display: flex; gap: 10px; align-items: flex-start;
+  margin-bottom: 24px; font-size: 13px; line-height: 1.6; color: #0f766e;
+}
+
+/* Conversation card */
+.conv-card {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  margin-bottom: 16px; overflow: hidden;
+}
+.conv-card.priority { border-color: #fca5a5; }
+
+.conv-header { display: flex; align-items: flex-start; gap: 14px; padding: 16px 20px; cursor: pointer; }
+.conv-header:hover { background: #fafaf9; }
+.conv-avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; flex-shrink: 0; }
+.conv-info { flex: 1; }
+.conv-top { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+.conv-student { font-size: 15px; font-weight: 700; }
+.conv-subject { font-size: 12px; color: var(--muted); }
+.conv-time { font-size: 12px; color: var(--muted); margin-left: auto; }
+.conv-reason { font-size: 13px; color: var(--text); line-height: 1.5; margin-bottom: 8px; }
+.conv-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+.badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+.badge-urgente { background: #fee2e2; color: #991b1b; }
+.badge-bloqueo { background: var(--warn-bg); color: var(--warn); }
+.badge-emocional { background: var(--accent-bg); color: var(--accent); }
+.badge-duda-tecnica { background: #eff6ff; color: var(--primary); }
+
+.conv-expand { display: none; border-top: 1px solid var(--border); background: #fafaf9; }
+.conv-expand.open { display: block; }
+
+/* Chat preview */
+.chat-preview { padding: 16px 20px; }
+.chat-msg { display: flex; gap: 10px; margin-bottom: 12px; }
+.chat-msg.agent { flex-direction: row-reverse; }
+.chat-bubble { max-width: 75%; font-size: 13px; line-height: 1.6; padding: 8px 12px; border-radius: 12px; }
+.chat-msg.student .chat-bubble { background: #f3f4f6; border-radius: 2px 12px 12px 12px; }
+.chat-msg.agent .chat-bubble { background: var(--accent-bg); color: #4c1d95; border-radius: 12px 2px 12px 12px; }
+.chat-from { font-size: 11px; color: var(--muted); margin-bottom: 3px; font-weight: 600; }
+.chat-msg.agent .chat-from { text-align: right; }
+.chat-ellipsis { text-align: center; font-size: 12px; color: var(--muted); padding: 4px 0 8px; }
+
+/* Agent analysis */
+.agent-analysis {
+  background: var(--warn-bg); border: 1px solid #fde68a;
+  border-radius: 8px; padding: 12px 16px; margin: 0 20px 16px;
+  font-size: 13px; line-height: 1.6;
+}
+.agent-analysis strong { display: block; margin-bottom: 4px; color: var(--warn); }
+
+.conv-actions { display: flex; gap: 8px; flex-wrap: wrap; padding: 12px 20px 16px; border-top: 1px solid var(--border); }
+
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; text-decoration: none; }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-h); }
+.btn-ghost { background: transparent; color: var(--primary); border: 1.5px solid var(--primary); }
+.btn-ghost:hover { background: #eff6ff; }
+.btn-muted { background: #f3f4f6; color: var(--text); border: 1.5px solid var(--border); }
+.btn-muted:hover { background: #e5e7eb; }
+.btn-sm { padding: 5px 11px; font-size: 12px; }
+
+.proto-badge { position: fixed; bottom: 20px; right: 20px; background: #1f2937; color: #fff; font-size: 11px; font-weight: 600; padding: 6px 14px; border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.3); z-index: 100; pointer-events: none; }
+.toast { position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%) translateY(80px); background: #1f2937; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,.3); transition: transform .3s; z-index: 200; }
+.toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../home-docente/index.html" style="font-size:13px;color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:4px;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">← Inicio</a>
+  <div class="header-badge">PROTOTIPO</div>
+  <div class="header-user">
+    <div class="avatar">MG</div>
+    <span>Prof. Martínez García</span>
+  </div>
+</header>
+
+<nav class="nav-tabs">
+  <a class="nav-tab" href="../home-docente/index.html">🏠 Mis asignaturas</a>
+  <a class="nav-tab" href="../agenda-docente/index.html">📅 Agenda</a>
+  <a class="nav-tab active" href="#">💬 Conversaciones (2)</a>
+  <a class="nav-tab" href="../analitica-docente/index.html">📊 Analítica global</a>
+</nav>
+
+<main>
+
+  <div class="page-header">
+    <h1>Conversaciones elevadas al docente</h1>
+    <p>El agente tutora a los estudiantes de forma autónoma. Solo eleva una conversación cuando detecta algo que requiere atención humana: un bloqueo persistente, señal emocional, o una decisión que el agente no puede tomar solo.</p>
+  </div>
+
+  <!-- Privacy notice -->
+  <div class="privacy-notice">
+    🔒 <span>Solo ves los mensajes que el agente ha marcado como relevantes para ti. El resto de las conversaciones del estudiante con el agente son privadas y no son accesibles desde aquí.</span>
+  </div>
+
+  <!-- Conversation 1 — Urgente -->
+  <div class="conv-card priority">
+    <div class="conv-header" onclick="toggleConv(1)">
+      <div class="conv-avatar" style="background:#fee2e2;color:#991b1b">CL</div>
+      <div class="conv-info">
+        <div class="conv-top">
+          <span class="conv-student">Carlos López</span>
+          <span class="conv-subject">Fundamentos de Programación · Módulo 2</span>
+          <span class="conv-time">Ayer, 22:41</span>
+        </div>
+        <div class="conv-reason">El agente lleva 4 sesiones intentando desbloquear a Carlos en el ejercicio de bucles anidados sin éxito. Detecta frustración creciente y considera que puede beneficiarse de una intervención directa del profesor.</div>
+        <div class="conv-badges">
+          <span class="badge badge-urgente">Urgente</span>
+          <span class="badge badge-bloqueo">Bloqueo técnico</span>
+          <span class="badge badge-emocional">Señal emocional</span>
+        </div>
+      </div>
+    </div>
+    <div class="conv-expand open" id="conv-1">
+      <div class="chat-preview">
+        <div class="chat-msg student">
+          <div>
+            <div class="chat-from">Carlos López · hace 2 días</div>
+            <div class="chat-bubble">No entiendo por qué este bucle for dentro del while no me imprime la tabla bien. Lo he intentado ya 5 veces</div>
+          </div>
+        </div>
+        <div class="chat-msg agent">
+          <div>
+            <div class="chat-from">Agente</div>
+            <div class="chat-bubble">Vamos a trazarlo juntos paso a paso. ¿Qué valor tiene i cuando j empieza en 0 por primera vez?</div>
+          </div>
+        </div>
+        <div class="chat-msg student">
+          <div>
+            <div class="chat-from">Carlos López · hace 1 día</div>
+            <div class="chat-bubble">Ya, pero es que... creo que no voy a ser capaz de con esto. Todo el mundo lo pilla menos yo</div>
+          </div>
+        </div>
+        <div class="chat-ellipsis">· · · 8 mensajes más · · ·</div>
+      </div>
+      <div class="agent-analysis">
+        <strong>🤖 Análisis del agente</strong>
+        Carlos tiene dificultades con el modelo mental de variables de control en bucles anidados. Ha intentado el ejercicio 5 veces con enfoques diferentes. El último mensaje muestra signos de desmotivación ("no voy a ser capaz"). El agente recomienda una sesión de tutoría directa con ejercicios en papel antes de volver al código.
+      </div>
+      <div class="conv-actions">
+        <button class="btn btn-primary btn-sm" onclick="showToast('Mensaje enviado a Carlos para agendar una tutoría')">Invitar a tutoría</button>
+        <button class="btn btn-ghost btn-sm" onclick="showToast('Abriendo editor para añadir ejercicio de diagnóstico')">Añadir ejercicio de apoyo</button>
+        <button class="btn btn-muted btn-sm" onclick="showToast('Marcado como revisado')">Marcar como revisado</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Conversation 2 — Duda técnica -->
+  <div class="conv-card">
+    <div class="conv-header" onclick="toggleConv(2)">
+      <div class="conv-avatar" style="background:#eff6ff;color:#1e40af">SV</div>
+      <div class="conv-info">
+        <div class="conv-top">
+          <span class="conv-student">Sofía Vidal</span>
+          <span class="conv-subject">Fundamentos de Programación · Módulo 3</span>
+          <span class="conv-time">Hoy, 10:15</span>
+        </div>
+        <div class="conv-reason">Sofía pregunta sobre una optimización de su código que va más allá del temario del módulo. El agente no tiene certeza sobre si esa técnica está dentro del alcance que el profesor quiere en esta asignatura.</div>
+        <div class="conv-badges">
+          <span class="badge badge-duda-tecnica">Duda técnica fuera de temario</span>
+        </div>
+      </div>
+    </div>
+    <div class="conv-expand" id="conv-2">
+      <div class="chat-preview">
+        <div class="chat-msg student">
+          <div>
+            <div class="chat-from">Sofía Vidal · hoy</div>
+            <div class="chat-bubble">He visto que si uso list comprehension en vez del bucle for el código es mucho más corto. ¿Por qué no usamos siempre eso en vez del bucle?</div>
+          </div>
+        </div>
+        <div class="chat-msg agent">
+          <div>
+            <div class="chat-from">Agente</div>
+            <div class="chat-bubble">¡Buena observación! Las list comprehensions son una herramienta muy potente en Python. Son equivalentes al bucle en muchos casos, pero el profesor puede tener una razón pedagógica para presentar primero el bucle explícito. Voy a consultar con él si puede guiarte más en ese tema.</div>
+          </div>
+        </div>
+      </div>
+      <div class="agent-analysis">
+        <strong>🤖 Nota del agente</strong>
+        Sofía está avanzando por encima del ritmo esperado y hace preguntas de nivel superior. ¿Quieres que el agente le explique list comprehensions en un callejón de profundización, o prefieres reservarlo para módulos posteriores?
+      </div>
+      <div class="conv-actions">
+        <button class="btn btn-primary btn-sm" onclick="showToast('Callejón de profundización sobre list comprehensions activado para Sofía')">Activar callejón para Sofía</button>
+        <button class="btn btn-muted btn-sm" onclick="showToast('El agente le dirá a Sofía que se verá en módulos posteriores')">Reservar para más adelante</button>
+        <button class="btn btn-muted btn-sm" onclick="showToast('Marcado como revisado')">Marcar como revisado</button>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align:center">
+    <a href="../home-docente/index.html" class="btn btn-muted">← Volver a mis asignaturas</a>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+<div class="proto-badge">PROTOTIPO DESECHABLE</div>
+
+<script>
+let toastTimer;
+function showToast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 2800);
+}
+function toggleConv(n) {
+  document.getElementById(`conv-${n}`).classList.toggle("open");
+}
+</script>
+</body>
+</html>
